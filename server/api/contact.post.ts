@@ -28,7 +28,7 @@ export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig(event);
   const turnstileSecret = config.turnstile.secretKey;
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const resendApiKey = config.resendKey;
+  const resendApiKey = config.privateResendApiKey;
 
   if (!turnstileSecret) {
     console.error('Missing Turnstile Secret');
