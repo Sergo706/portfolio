@@ -1,0 +1,9 @@
+{
+    "name": "Heuristic Bot Detection Engine",
+    "image": "/projects/maison-hochard.webp",
+    "link": "https://github.com/Sergo706",
+    "release": "2024",
+    "date": "2024",
+    "featured": true,
+    "description": "Scoring-based traffic analysis engine distinguishing automated actors from legitimate users. Implements device fingerprinting heuristics, ASN/Geo-IP intelligence integration, and a verified 'Good Bot' pipeline utilizing reverse DNS to ensure legitimate SEO crawlers are never blocked."
+}

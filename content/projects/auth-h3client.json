@@ -1,0 +1,9 @@
+{
+    "name": "Auth-H3Client BFF",
+    "image": "/projects/maison-hochard.webp",
+    "link": "https://github.com/Sergo706",
+    "release": "2024",
+    "date": "2024",
+    "featured": true,
+    "description": "Reusable Nuxt module acting as a Backend-for-Frontend authentication layer. Server middleware automatically injects HMAC request signatures and manages session cookies. Establishes strict API contracts with end-to-end typed responses between frontend clients and the IAM service."
+}

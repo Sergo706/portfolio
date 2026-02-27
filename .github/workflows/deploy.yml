@@ -1,0 +1,36 @@
+name: Deploy
+
+on: 
+  push:
+    branches: 
+      - main
+
+jobs:
+  type-and-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: npm install
+        run: npm install
+
+      - name: typecheck
+        run: npm run typecheck
+      - name: lint
+        run: npm run lint:fix
+
+  cloudflare: 
+    needs: type-and-lint
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: actions/checkout@v3
+      - run: npm install && npm run build
+        working-directory: ./
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with: 
+          apiToken: ${{ secrets.CF_TOKEN }}
+          accountId: ${{ secrets.CF_ACC_ID }}
+          command: pages deploy .output/public --project-name portfolio

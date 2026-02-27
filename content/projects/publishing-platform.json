@@ -1,0 +1,9 @@
+{
+    "name": "Technical Publishing Platform",
+    "image": "/projects/share.png",
+    "link": "https://github.com/Sergo706",
+    "release": "Soon",
+    "date": "2024",
+    "featured": false,
+    "description": "Full-stack developer publishing platform built with Nuxt 4, Drizzle ORM, and Nitro. Designed a secure media pipeline using signed S3 uploads, an AST-based Markdown parsing pipeline for XSS prevention, and optimized delivery using stale-while-revalidate caching."
+}

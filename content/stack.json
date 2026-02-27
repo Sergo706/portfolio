@@ -1,0 +1,124 @@
+{
+  "items": [
+    {
+      "name": "JavaScript",
+      "link": "https://developer.mozilla.org/en-US/docs/Web/JavaScript",
+      "icon": "i-logos-javascript"
+    },
+    {
+      "name": "TypeScript",
+      "link": "https://www.typescriptlang.org/",
+      "icon": "custom:typescript"
+    },
+    {
+      "name": "Node.js",
+      "link": "https://nodejs.org/",
+      "icon": "custom:node"
+    },
+    {
+      "name": "Express",
+      "link": "https://expressjs.com/",
+      "icon": "custom:express"
+    },
+    {
+      "name": "H3 / Nitro",
+      "link": "https://nitro.unjs.io/",
+      "icon": "i-logos-unjs"
+    },
+    {
+      "name": "Nuxt",
+      "link": "https://nuxt.com/",
+      "icon": "custom:nuxt"
+    },
+    {
+      "name": "Vue",
+      "link": "https://vuejs.org/",
+      "icon": "custom:vue"
+    },
+    {
+      "name": "React",
+      "link": "https://react.dev/",
+      "icon": "i-logos-react"
+    },
+    {
+      "name": "TailwindCSS",
+      "link": "https://tailwindcss.com/",
+      "icon": "custom:tailwind"
+    },
+    {
+      "name": "MySQL",
+      "link": "https://www.mysql.com/",
+      "icon": "i-logos-mysql"
+    },
+    {
+      "name": "SQLite",
+      "link": "https://sqlite.org/",
+      "icon": "i-logos-sqlite"
+    },
+    {
+      "name": "Redis",
+      "link": "https://redis.io/",
+      "icon": "i-logos-redis"
+    },
+    {
+      "name": "Drizzle ORM",
+      "link": "https://orm.drizzle.team/",
+      "icon": "custom:drizzle"
+    },
+    {
+      "name": "AWS S3",
+      "link": "https://aws.amazon.com/s3/",
+      "icon": "i-logos-aws-s3"
+    },
+    {
+      "name": "Docker",
+      "link": "https://www.docker.com/",
+      "icon": "custom:docker"
+    },
+    {
+      "name": "Linux / Bash",
+      "link": "https://ubuntu.com/",
+      "icon": "i-logos-ubuntu"
+    },
+    {
+      "name": "Caddy",
+      "link": "https://caddyserver.com/",
+      "icon": "custom:caddy"
+    },
+    {
+      "name": "Git",
+      "link": "https://git-scm.com/",
+      "icon": "i-logos-git-icon"
+    },
+    {
+      "name": "Postman",
+      "link": "https://www.postman.com/",
+      "icon": "i-logos-postman-icon"
+    },
+    {
+      "name": "Jest",
+      "link": "https://jestjs.io/",
+      "icon": "i-logos-jest"
+    },
+    {
+      "name": "Vitest",
+      "link": "https://vitest.dev/",
+      "icon": "i-logos-vitest"
+    },
+    {
+      "name": "Playwright",
+      "link": "https://playwright.dev/",
+      "icon": "i-logos-playwright"
+    },
+    {
+      "name": "Cloudflare",
+      "link": "https://www.cloudflare.com/",
+      "icon": "custom:cloudflare"
+    },
+    {
+      "name": "Vercel",
+      "link": "https://vercel.com/",
+      "icon": "custom:vercel"
+    }
+  ]
+}

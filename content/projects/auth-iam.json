@@ -1,0 +1,9 @@
+{
+  "name": "Centralized IAM Service",
+  "image": "/projects/maison-hochard.webp",
+  "link": "https://github.com/Sergo706",
+  "release": "2024",
+  "date": "2024",
+  "featured": true,
+  "description": "Standalone authentication service for identity management, OAuth2 provisioning, and MFA workflows. Features a custom HMAC-SHA256 protocol, session family token rotation with deterministic canary cookies, and multi-layer rate limiting. Pre-auth security includes Argon2id hashing and k-anonymity API integration."
+}
