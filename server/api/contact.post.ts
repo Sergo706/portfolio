@@ -3,9 +3,20 @@ import { contactSchema, type Contact } from '~~/shared/types/ContactSchema';
 
 export default defineEventHandler(async (event) => {
 
+  console.log('--- Contact API Route Triggered ---');
   const rawBody = await readBody<Contact>(event);
-  const body = contactSchema.parse(rawBody);
-  const { token, email, fullname, subject, message, phone } = body;
+  console.log('Received body:', rawBody);
+  const body = contactSchema.safeParse(rawBody);
+
+  if (!body.success) {
+      console.error('Validation failed:', body.error);
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'Invalid form data',
+      });
+    }
+
+  const { token, email, fullname, subject, message, phone } = body.data;
 
   if (!token) {
     throw createError({
@@ -14,33 +25,37 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const config = useRuntimeConfig();
+  const config = useRuntimeConfig(event);
   const turnstileSecret = config.turnstile.secretKey;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const resendApiKey = config.resendKey;
 
   if (!turnstileSecret) {
+    console.error('Missing Turnstile Secret');
     throw createError({
       statusCode: 500,
       statusMessage: 'Server error',
     });
   }
 
-  const verifyResponse = await verifyTurnstileToken(token);
+  if (!resendApiKey) {
+    console.error('Missing Resend API Key');
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Resend API key is not configured',
+    });
+  }
+
+  const verifyResponse = await verifyTurnstileToken(token, event);
 
   if (!verifyResponse.success) {
+    console.error('Captcha verification failed');
     throw createError({
       statusCode: 400,
       statusMessage: 'Captcha verification failed',
     });
   }
 
-  const resendApiKey = process.env.NUXT_RESEND_API_KEY;
-
-  if (!resendApiKey) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Resend API key is not configured',
-    });
-  }
 
   const emailHtml = `
     <h2>New Contact Form Submission</h2>
@@ -51,12 +66,12 @@ export default defineEventHandler(async (event) => {
     <h3>Message:</h3>
     <p>${message || ''}</p>
   `;
-
+  console.log('Attempting to send email via Resend...');
   try {
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${resendApiKey}`,
+        'Authorization': `Bearer ${String(resendApiKey)}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -78,10 +93,10 @@ export default defineEventHandler(async (event) => {
       });
     }
 
+    console.log('Email sent successfully! ID:', data.id);
     return { success: true };
   } catch (err: unknown) {
-    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-    console.error('Server error sending email:', errorMessage);
+    console.error('FATAL SERVER ERROR IN CONTACT API:', err);
     throw createError({
       statusCode: 500,
       statusMessage: 'Failed to send email. Please try again later.',

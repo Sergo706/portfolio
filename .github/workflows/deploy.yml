@@ -50,6 +50,5 @@ jobs:
         with:
           apiToken: ${{ secrets.CF_TOKEN }}
           accountId: ${{ secrets.CF_ACC_ID }}
-          projectName: 'portfolio' 
           workingDirectory: 'dist'
           command: pages deploy dist --project-name portfolio
