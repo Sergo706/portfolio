@@ -27,7 +27,6 @@ export default defineEventHandler(async (event) => {
 
   const config = useRuntimeConfig(event);
   const turnstileSecret = config.turnstile.secretKey;
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const resendApiKey = config.privateResendApiKey;
 
   if (!turnstileSecret) {
@@ -71,7 +70,7 @@ export default defineEventHandler(async (event) => {
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${String(resendApiKey)}`,
+        'Authorization': `Bearer ${resendApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({

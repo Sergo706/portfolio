@@ -141,9 +141,9 @@ async function onSubmit() {
           />
         </UFormField>
         <NuxtTurnstile 
-          class="w-full"
           ref="turnstile"
           v-model="token"
+          class="w-full"
         />
         <div class="flex justify-center">
           <UButton
