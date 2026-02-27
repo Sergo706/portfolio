@@ -1,36 +1,54 @@
 name: Deploy
 
-on: 
+on:
   push:
-    branches: 
+    branches:
       - main
 
 jobs:
   type-and-lint:
     runs-on: ubuntu-latest
     steps:
-      - name: checkout
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: npm install
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Dependencies
         run: npm ci
 
-      - name: typecheck
+      - name: Typecheck
         run: npm run typecheck
-      - name: lint
+
+      - name: Lint
         run: npm run lint:fix
 
-  cloudflare: 
+  cloudflare:
     needs: type-and-lint
     runs-on: ubuntu-latest
-    steps: 
-      - uses: actions/checkout@v3
-      - run: npm ci && npm run build
-        working-directory: ./
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install & Build
+        run: |
+          npm ci
+          npm run build
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
-        with: 
+        with:
           apiToken: ${{ secrets.CF_TOKEN }}
           accountId: ${{ secrets.CF_ACC_ID }}
-          command: pages deploy .output/public --project-name portfolio
+          projectName: 'portfolio' 
+          directory: 'dist'
