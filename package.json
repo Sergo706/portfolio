@@ -27,7 +27,6 @@
     "@vueuse/nuxt": "14.2.1",
     "better-sqlite3": "^12.6.2",
     "nuxt": "4.3.1",
-    "resend": "6.9.2",
     "sitemap": "9.0.0",
     "ufo": "1.6.3",
     "vue-sonner": "2.0.9"

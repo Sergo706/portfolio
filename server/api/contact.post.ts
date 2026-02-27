@@ -1,6 +1,5 @@
 import { defineEventHandler, readBody, createError } from '#imports';
 import { contactSchema, type Contact } from '~~/shared/types/ContactSchema';
-import { Resend } from 'resend';
 
 export default defineEventHandler(async (event) => {
 
@@ -54,19 +53,29 @@ export default defineEventHandler(async (event) => {
   `;
 
   try {
-    const resend = new Resend(resendApiKey);
-
-    const { error } = await resend.emails.send({
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${resendApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
         from: 'noreply@riavzon.com',
-        to: 'sergo998826@gmail.com', 
+        to: 'sergo998826@gmail.com',
         subject: `(Portfolio) New contact inquiry: ${subject || 'No subject'}`,
         html: emailHtml,
-        replyTo: email || '',
+        reply_to: email || '',
+      }),
     });
 
-    if (error) {
-       console.error('Resend error:', error);
-       throw createError({ statusCode: 500, statusMessage: 'Failed to send email via Resend' });
+    const data = await response.json() as { id?: string; error?: unknown };
+
+    if (!response.ok || data.error) {
+      console.error('Resend error:', data.error);
+      throw createError({ 
+        statusCode: response.status, 
+        statusMessage: 'Failed to send email' 
+      });
     }
 
     return { success: true };
