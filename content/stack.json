@@ -21,9 +21,14 @@
       "icon": "custom:express"
     },
     {
-      "name": "H3 / Nitro",
+      "name": "H3",
+      "link": "https://h3.unjs.io/",
+      "icon": "custom:h3"
+    },
+    {
+      "name": "Nitro",
       "link": "https://nitro.unjs.io/",
-      "icon": "i-logos-unjs"
+      "icon": "custom:nitro"
     },
     {
       "name": "Nuxt",

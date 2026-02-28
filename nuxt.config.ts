@@ -8,16 +8,12 @@ export default defineNuxtConfig({
     '@nuxt/scripts',
     '@nuxtjs/turnstile',
     '@nuxt/fonts',
-    'nuxt-vitalizer',
   ],
   fonts: {
     families: [
       { name: 'Geist', display: 'swap', preload: true },
       { name: 'Newsreader', display: 'swap', preload: true },
     ],
-  },
-  vitalizer: {
-    disableStylesheets: 'entry',
   },
   turnstile: {
     siteKey: '',
