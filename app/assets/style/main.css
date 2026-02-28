@@ -37,7 +37,10 @@ html.dark {
   --font-placeholder: #707070;
 }
 
-html, body, #__nuxt, #__layout {
+html,
+body,
+#__nuxt,
+#__layout {
   height: 100% !important;
   width: 100% !important;
 

@@ -11,10 +11,10 @@ export default defineNuxtConfig({
     'nuxt-vitalizer',
   ],
   fonts: {
-    defaults: {
-      weights: [400, 500, 600, 700],
-      styles: ['normal', 'italic'],
-    },
+    families: [
+      { name: 'Geist', display: 'swap', preload: true },
+      { name: 'Newsreader', display: 'swap', preload: true },
+    ],
   },
   vitalizer: {
     disableStylesheets: 'entry',
