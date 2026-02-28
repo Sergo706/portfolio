@@ -67,7 +67,7 @@ export default defineNuxtConfig({
     viewTransition: true,
   },
 
-  compatibilityDate: "2024-09-19",
+  compatibilityDate: "2024-09-20",
 
   nitro: {
     prerender: {
