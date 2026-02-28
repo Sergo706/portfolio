@@ -7,7 +7,18 @@ export default defineNuxtConfig({
     '@nuxt/image',
     '@nuxt/scripts',
     '@nuxtjs/turnstile',
+    '@nuxt/fonts',
+    'nuxt-vitalizer',
   ],
+  fonts: {
+    defaults: {
+      weights: [400, 500, 600, 700],
+      styles: ['normal', 'italic'],
+    },
+  },
+  vitalizer: {
+    disableStylesheets: 'entry',
+  },
   turnstile: {
     siteKey: '',
   },
