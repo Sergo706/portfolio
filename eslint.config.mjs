@@ -6,6 +6,8 @@ export default defineConfig(
   {
     ignores: [
       '.nuxt/**',
+      '.output/**',
+      'dist/**',
       'node_modules/**',
       '*.config.*',
       '**/*.{yml,sh,json,txt,age,md}',

@@ -29,9 +29,12 @@ const { data: projects } = await useAsyncData('projects', async () => {
         </span>
       </NuxtLink>
     </div>
-    <NuxtLink to="/works">
+    <NuxtLink
+      to="/works"
+      aria-label="View all works and projects"
+    >
       <span class="font-newsreader italic text-white-shadow cursor-pointer">
-        See more
+        See all works & projects →
       </span>
     </NuxtLink>
   </div>

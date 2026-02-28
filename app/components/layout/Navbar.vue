@@ -21,7 +21,7 @@ const route = useRoute();
         :animate="false"
         class="border border-white/10"
       >
-        <nav class="z-10 flex h-[50px] justify-around gap-2 p-1 transition-all duration-300 ease-in-out sm:h-[45px] sm:hover:gap-4">
+        <nav class="z-10 flex h-13 justify-around gap-2 p-1 transition-all duration-300 ease-in-out sm:h-12 sm:hover:gap-4">
           <NuxtLink
             v-for="item in navigation"
             :id="item.name.toLowerCase()"
@@ -33,7 +33,7 @@ const route = useRoute();
                 : 'text-muted',
             ]"
             :to="item.to"
-            class="flex items-center rounded-full border border-transparent px-4 py-1 transition-all duration-300 ease-in-out hover:border-white/5 hover:bg-zinc-900/50 hover:backdrop-blur-3xl sm:px-6"
+            class="flex items-center rounded-full border border-transparent px-4 py-2 transition-all duration-300 ease-in-out hover:border-white/5 hover:bg-zinc-900/50 hover:backdrop-blur-3xl sm:px-6"
           >
             <UIcon
               :name="item.icon"
