@@ -104,6 +104,11 @@ export default defineNuxtConfig({
       secretKey: '',
     },
     privateResendApiKey: '',
+    public: {
+        turnstile: {
+          siteKey: '', 
+        },
+      },
   },
   ogImage: {
     zeroRuntime: true,
