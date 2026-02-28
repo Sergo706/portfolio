@@ -13,14 +13,14 @@ const { profile } = useAppConfig();
       <div class="relative">
         <NuxtImg
           width="256"
-          :src="profile.picture"
+          src="/profile-256.webp"
           class="absolute inset-0 size-64 scale-110 rounded-xl object-cover blur-xl grayscale saturate-200 transition-all duration-300 group-hover:blur-[32px] group-hover:grayscale-0"
           :alt="profile.name + ' Profile Picture'"
           :aria-label="profile.name + ' Profile Picture'"
         />
         <NuxtImg
           width="256"
-          :src="profile.picture"
+          src="/profile-256.webp"
           class="relative size-64 rounded-xl object-cover grayscale transition-all duration-300 group-hover:grayscale-0"
           :alt="profile.name + ' Profile Picture'"
           :aria-label="profile.name + ' Profile Picture'"
@@ -35,7 +35,7 @@ const { profile } = useAppConfig();
     >
       <NuxtImg
         width="256"
-        :src="profile.picture"
+        src="/profile-256.webp"
         class="size-64 rounded-xl object-cover transition-all duration-300"
         :alt="profile.name + ' Profile Picture'"
         :aria-label="profile.name + ' Profile Picture'"

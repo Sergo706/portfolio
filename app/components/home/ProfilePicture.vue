@@ -10,7 +10,7 @@ const isZoomed = ref<boolean>(false);
         class="font-mona relative flex items-center justify-center gap-2 bg-linear-to-b from-white/25 to-white bg-clip-text text-lg font-medium text-transparent transition-all duration-200"
       >
         <NuxtImg
-          :src="profile.picture!"
+          src="/profile-96.webp"
           format="webp"
           width="96"
           height="96"
@@ -49,7 +49,7 @@ const isZoomed = ref<boolean>(false);
           >
             <NuxtImg
               v-if="isZoomed"
-              :src="profile.picture!"
+              src="/profile-400.webp"
               format="webp"
               width="400"
               height="400"
