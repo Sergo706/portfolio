@@ -14,10 +14,10 @@ const pageSEO = computed(() => ({
   description: isWriting ? page.description : page.description || seo.description,
 }));
 
-const getTitleTemplate = (title: string | undefined): string | undefined => {
-  if (route.path === '/') return title ?? seo.title;
-  if (isWriting) return title;
-  return `${String(title)} | ${seo.title}`;
+const getTitleTemplate = (titleChunk: string | undefined): string => {
+  if (route.path === '/') return titleChunk ?? seo.title;
+  if (isWriting) return titleChunk ?? '';
+  return titleChunk ? `${titleChunk} | ${seo.title}` : seo.title;
 };
 
 useSeoMeta({
@@ -36,7 +36,7 @@ useSeoMeta({
 
 useHead({
   title: pageSEO.value.title,
-  titleTemplate: getTitleTemplate(undefined),
+  titleTemplate: getTitleTemplate,
   meta: [
     { name: 'viewport', content: 'width=device-width, initial-scale=1.0' },
     { name: 'charset', content: 'utf-8' },

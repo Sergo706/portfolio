@@ -16,7 +16,7 @@ export default defineNuxtConfig({
     ],
   },
   turnstile: {
-    siteKey: '',
+    siteKey: '0x4AAAAAACi5J_aDDxg04Jkl',
   },
   imports: {
     presets: [
@@ -104,11 +104,6 @@ export default defineNuxtConfig({
       secretKey: '',
     },
     privateResendApiKey: '',
-    public: {
-        turnstile: {
-          siteKey: '', 
-        },
-      },
   },
   ogImage: {
     zeroRuntime: true,
