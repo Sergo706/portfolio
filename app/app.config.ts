@@ -6,7 +6,7 @@ export default defineAppConfig({
   profile: {
     name: 'Sergey Riavzon',
     job: 'Full-stack engineer',
-    email: 'sergo998826@gmail.com',
+    email: 'contact@riavzon.com',
     phone: '+972-52-466-0210',
     picture: '/profile.jpg',
   },
