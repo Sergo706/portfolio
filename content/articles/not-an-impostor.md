@@ -1,6 +1,6 @@
 ---
 title: You are not an impostor
-date: 11/01/2024
+date: 11/03/2026
 description: "In the theater of content creation, many backstage whisper a
   phrase tinged with doubt: 'I m not legitimate, others are so much better.'
   This melody of insecurity, often played over and over in the minds of emerging

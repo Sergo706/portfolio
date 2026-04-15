@@ -1,9 +1,11 @@
 {
-  "name": "Centralized IAM Service",
-  "image": "/projects/maison-hochard.webp",
-  "link": "https://github.com/Sergo706",
-  "release": "2024",
+  "name": "Auth Service",
+  "image": "/projects/auth.png",
+  "link": "https://docs.riavzon.com/docs/iam",
+  "github": "https://github.com/Sergo706/auth",
+  "npm": "https://www.npmjs.com/package/@riavzon/auth",
+  "release": "2025",
   "date": "2024",
   "featured": true,
-  "description": "Standalone authentication service for identity management, OAuth2 provisioning, and MFA workflows. Features a custom HMAC-SHA256 protocol, session family token rotation with deterministic canary cookies, and multi-layer rate limiting. Pre-auth security includes Argon2id hashing and k-anonymity API integration."
+  "description": "Authentication service for identity management, OAuth, and MFA; implements HMAC-SHA256 signing, session-family token rotation with deterministic canary cookies, and multi-layer rate limiting."
 }

@@ -1,7 +1,8 @@
 {
-    "name": "Technical Publishing Platform",
+    "name": "Publishing Platform",
     "image": "/projects/share.png",
-    "link": "https://github.com/Sergo706",
+    "github": "https://github.com/Sergo706/share",
+    "link": "https://github.com/Sergo706/share",
     "release": "Soon",
     "date": "2024",
     "featured": false,

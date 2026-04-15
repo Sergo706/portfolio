@@ -1,9 +1,10 @@
 {
     "name": "Personal Portfolio",
     "image": "/projects/portfolio.png",
-    "link": "https://github.com/Sergo706",
+    "link": "https://riavzon.com",
+    "github": "https://github.com/Sergo706/portfolio",
     "release": "2026",
     "date": "2026",
-    "featured": true,
-    "description": "Sleek Nuxt 4 portfolio deployed on Cloudflare Pages. Features custom Tailwind animations, fully typed Vue 3 components, and a secure serverless backend utilizing Hybrid SSR, Cloudflare Turnstile bot detection, and automated Resend integrations."
+    "featured": false,
+    "description": "Sleek Nuxt 4 portfolio deployed on Cloudflare Pages. Features custom Tailwind animations, fully typed Vue 3 components, and a secure serverless backend using Hybrid SSR, Cloudflare Turnstile bot detection, and automated Resend integrations."
 }

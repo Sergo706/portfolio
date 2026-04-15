@@ -1,9 +1,11 @@
 {
-    "name": "Auth-H3Client BFF",
-    "image": "/projects/maison-hochard.webp",
-    "link": "https://github.com/Sergo706",
-    "release": "2024",
-    "date": "2024",
+    "name": "Auth H3Client",
+    "image": "/projects/auth-h3client.png",
+    "link": "https://docs.riavzon.com/docs/auth-h3client",
+    "github": "https://github.com/Sergo706/auth-h3client",
+    "npm": "https://www.npmjs.com/package/@riavzon/auth-h3client",
+    "release": "2025",
+    "date": "2025",
     "featured": true,
-    "description": "Reusable Nuxt module acting as a Backend-for-Frontend authentication layer. Server middleware automatically injects HMAC request signatures and manages session cookies. Establishes strict API contracts with end-to-end typed responses between frontend clients and the IAM service."
+    "description": "Backend-for-frontend toolkit for the IAM service, that can be used with H3/Nitro frameworks; provides authentication helpers, OAuth client for various providers, typed session management, and route/event handler wrappers. Has a dedicated Nuxt module."
 }

@@ -1,6 +1,6 @@
 ---
 title: Finally launch your portfolio
-date: 20/10/2023
+date: 20/1/2026
 description: Aiming for perfectionism is a very good state of mind. On the other
   hand, working until perfectionism is 100% can also be bad. Here are some tips
   to help you get your portfolio off the ground.

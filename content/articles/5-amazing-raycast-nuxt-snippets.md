@@ -1,6 +1,6 @@
 ---
 title: 5 Amazing Raycast Snippets for Enhancing Your Nuxt (Vue) Projects
-date: 22/01/2024
+date: 22/02/2026
 description: In the realm of web development, where efficiency is as valuable as
   expertise, tools that streamline and simplify our workflow are indispensable.
   Among these, Raycast snippets emerge as a powerful ally, especially for those

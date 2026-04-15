@@ -1,0 +1,11 @@
+{
+  "name": "Shield Base",
+  "image": "/projects/shield-base.png",
+  "link": "https://docs.riavzon.com/docs/shield-base",
+  "github": "https://github.com/Sergo706/shield-base-cli",
+  "npm": "https://www.npmjs.com/package/@riavzon/shield-base",
+  "release": "2026",
+  "date": "2026",
+  "featured": true,
+  "description": "CLI and programmatic toolkit for sourcing, normalizing, and compiling network data into binary database formats (MMDB/LMDB). Can generate arbitrary TypeScript type definitions and custom MMDB/LMDB databases."
+}

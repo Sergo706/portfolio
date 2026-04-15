@@ -1,13 +1,13 @@
 import { defineCollection, z } from '@nuxt/content'
 import { asSeoCollection } from '@nuxtjs/seo/content'
 
-const commonContentSchema = z.object({
+const contentSchema = z.object({
   title: z.string().nonempty(),
   description: z.string().nonempty(),
   date: z.string().nonempty(),
 })
 
-const commonArticleSchema = z.object({
+const articleSchema = z.object({
   title: z.string().nonempty(),
   description: z.string().nonempty(),
   date: z.string().nonempty(),
@@ -16,17 +16,19 @@ const commonArticleSchema = z.object({
   tags: z.array(z.string().nonempty()),
 })
 
-const commonProjectSchema = z.object({
+const projectSchema = z.object({
   name: z.string().nonempty(),
   description: z.string().optional(),
   image: z.string().url(),
+  github: z.string().url(),
   link: z.string().url(),
+  npm: z.string().url(),
   release: z.string().nonempty(),
   date: z.string().nonempty(),
   featured: z.boolean().optional(),
 })
 
-const commonFaqSchema = z.object({
+const faqSchema = z.object({
   title: z.string().nonempty(),
   subtitle: z.string().nonempty(),
   faqQuestions: z.array(
@@ -50,7 +52,7 @@ export const collections = {
         include: '**/*.md',
         exclude: ['articles/*.md'],
       },
-      schema: commonContentSchema,
+      schema: contentSchema,
     }),
   ),
 
@@ -60,7 +62,7 @@ export const collections = {
       source: {
         include: 'articles/*.md',
       },
-      schema: commonArticleSchema,
+      schema: articleSchema,
     }),
   ),
 
@@ -68,7 +70,7 @@ export const collections = {
     asSeoCollection({
       type: 'data',
       source: 'projects/*.json',
-      schema: commonProjectSchema,
+      schema: projectSchema,
     }),
   ),
   stack: defineCollection({
@@ -87,6 +89,6 @@ export const collections = {
   faq: defineCollection({
     type: 'data',
     source: 'faq.json',
-    schema: commonFaqSchema,
+    schema: faqSchema,
   }),
 }

@@ -5,7 +5,9 @@ defineProps<{
     name: string;
     release: string;
     image: string;
-    link: string;
+    link?: string;
+    github: string;
+    npm?: string;
     description?: string;
   };
 }>();
@@ -15,14 +17,41 @@ const img = useImage();
 <template>
   <NuxtLink
     :aria-label="project.name + ' project link'"
-    :to="project.link"
+    :to="project.link ?? project.github"
     target="_blank"
     class="group relative flex cursor-pointer flex-col gap-1 rounded-lg border border-white/10 bg-zinc-900/80 p-1 shadow-2xl shadow-zinc-950/50 backdrop-blur-sm"
   >
-    <div class="flex gap-1 px-1 py-[2px]">
-      <div class="size-2 rounded-full bg-red-500/90 transition-all duration-300 group-hover:bg-red-500/90 sm:bg-white/10" />
-      <div class="size-2 rounded-full bg-yellow-500/90 transition-all duration-300 group-hover:bg-yellow-500/90 sm:bg-white/10" />
-      <div class="size-2 rounded-full bg-green-500/90 transition-all duration-300 group-hover:bg-green-500/90 sm:bg-white/10" />
+    <div class="flex items-center justify-center py-[3px]">
+      <div class="flex gap-1 px-2  mr-auto">
+        <div class="size-2 rounded-full bg-red-500/90 transition-all duration-300 group-hover:bg-red-500/90 sm:bg-white/10" />
+        <div class="size-2 rounded-full bg-yellow-500/90 transition-all duration-300 group-hover:bg-yellow-500/90 sm:bg-white/10" />
+        <div class="size-2 rounded-full bg-green-500/90 transition-all duration-300 group-hover:bg-green-500/90 sm:bg-white/10" />
+      </div>
+
+      <div class="flex items-center justify-center ml-auto px-2 gap-2">
+        <NuxtLink
+          v-if="project.npm"
+          :to="project.npm"
+          target="_blank"
+          class="inline-flex items-center justify-center h-6 w-6 rounded-md"
+        >
+          <Icon
+            name="custom:npm"
+            class="size-5 transition-all duration-300 text-[#cb3837] sm:text-white/70 hover:text-[#cb3837]"
+          />
+        </NuxtLink>
+
+        <NuxtLink
+          :to="project.github"
+          target="_blank"
+          class="inline-flex items-center justify-center h-6 w-6 rounded-md"
+        >
+          <Icon
+            name="custom:github"
+            class="size-5 transition-all duration-300 text-white sm:text-white/70 hover:text-white"
+          />
+        </NuxtLink>
+      </div>
     </div>
     <!-- Image and Hover Description Overlay -->
     <div class="relative flex h-56 justify-center overflow-hidden rounded-lg">

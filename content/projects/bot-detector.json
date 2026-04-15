@@ -1,9 +1,11 @@
 {
-    "name": "Heuristic Bot Detection Engine",
-    "image": "/projects/maison-hochard.webp",
-    "link": "https://github.com/Sergo706",
-    "release": "2024",
+    "name": "Bot Detector",
+    "image": "/projects/bot-detector.png",
+    "link": "https://docs.riavzon.com/docs/bot-detection",
+    "github": "https://github.com/Sergo706/botDetector",
+    "npm": "https://www.npmjs.com/package/@riavzon/bot-detector",
+    "release": "2025",
     "date": "2024",
     "featured": true,
-    "description": "Scoring-based traffic analysis engine distinguishing automated actors from legitimate users. Implements device fingerprinting heuristics, ASN/Geo-IP intelligence integration, and a verified 'Good Bot' pipeline utilizing reverse DNS to ensure legitimate SEO crawlers are never blocked."
+    "description": "Express middleware that scores requests through a two‑phase pipeline of 17 checkers (IP/geo/TLS/fingerprint/behavior/custom), backed by Shield‑Base threat data; auto-generates typed high‑risk/banned MMDBs from visitor history, includes a CLI to manage data sources, and supports configurable ban thresholds and optional firewall enforcement."
 }

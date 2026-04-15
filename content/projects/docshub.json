@@ -1,0 +1,11 @@
+{
+  "name": "Docshub",
+  "image": "/projects/docshub.png",
+  "link": "https://docs.riavzon.com",
+  "github": "https://github.com/Sergo706/docshub",
+  "release": "2026",
+  "date": "2026",
+  "featured": true,
+  "description": "Documentation platform and developer portal built with Nuxt 4 and @nuxt/content. Publishes guides for the tools I build, supports hybrid SSR/SSG, uses Nuxt UI components, and integrates automated feed generation."
+}
+

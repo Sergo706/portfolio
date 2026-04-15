@@ -1,0 +1,11 @@
+{
+  "name": "Utils",
+  "image": "/projects/utils.png",
+  "link": "https://docs.riavzon.com/docs/utils",
+  "github": "https://github.com/Sergo706/utils",
+  "npm": "https://www.npmjs.com/package/@riavzon/utils",
+  "release": "2025",
+  "date": "2026",
+  "featured": true,
+  "description": "Collection of TypeScript helpers and ESLint configs for backend and full‑stack apps that I reuse across different projects"
+}
