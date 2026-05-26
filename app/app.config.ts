@@ -33,6 +33,18 @@ export default defineAppConfig({
         background: 'bg-transparent dark:bg-transparent',
       },
     },
+    prose: {
+      a: {
+        base: [
+          'font-medium',
+          'transition-colors',
+          'hover:text-primary/90',
+          'after:content-["↗"]',
+          'after:ml-1',
+          'after:text-[0.8em]'
+        ]
+      }      
+    },
     button: {
       slots: {
         base: 'cursor-pointer',

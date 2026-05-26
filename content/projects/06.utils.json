@@ -6,6 +6,6 @@
   "npm": "https://www.npmjs.com/package/@riavzon/utils",
   "release": "2025",
   "date": "2026",
-  "featured": true,
+  "featured": false,
   "description": "Collection of TypeScript helpers and ESLint configs for backend and full‑stack apps that I reuse across different projects"
 }

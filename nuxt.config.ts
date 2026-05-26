@@ -46,6 +46,7 @@ export default defineNuxtConfig({
 
   mdc: {
     highlight: {
+      langs: ['pascal'],
       theme: {
         dark: 'github-dark',
         default: 'github-dark',

@@ -1,0 +1,10 @@
+{
+    "name": "Solana Bots",
+    "image": "/projects/home.png",
+    "link": "https://solana.riavzon.com/",
+    "github": "https://github.com/Sergo706/solana-bots",
+    "release": "2026",
+    "date": "2026",
+    "featured": true,
+    "description": "A cross-platform desktop application and CLI for the Solana network that handles concurrent mass token swaps and trading automation, featuring built-in encrypted multi-wallet management and mass operation capabilities. Distributed as compiled installers with Cloudflare's S3"
+}
