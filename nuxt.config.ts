@@ -104,6 +104,8 @@ export default defineNuxtConfig({
     turnstile: {
       secretKey: '',
     },
+    webhookSecret: '',
+    githubToken: '',
     privateResendApiKey: '',
   },
   ogImage: {

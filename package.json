@@ -23,6 +23,7 @@
     "@nuxt/ui": "4.4.0",
     "@nuxtjs/seo": "3.4.0",
     "@nuxtjs/turnstile": "1.1.1",
+    "@octokit/webhooks": "^14.2.0",
     "@vueuse/core": "14.2.1",
     "@vueuse/nuxt": "14.2.1",
     "better-sqlite3": "^12.6.2",
@@ -33,7 +34,9 @@
     "vue-sonner": "2.0.9"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260702.1",
     "@nuxt/eslint-config": "1.15.1",
+    "@octokit/webhooks-types": "^7.6.1",
     "eslint": "9.39.3",
     "eslint-plugin-vue": "10.8.0",
     "typescript-eslint": "8.56.1"

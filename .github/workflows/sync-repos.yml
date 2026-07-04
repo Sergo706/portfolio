@@ -1,0 +1,53 @@
+name: sync repos
+
+on:
+  workflow_dispatch:
+    inputs:
+      repo:
+        description: 'Repo name to sync'
+        required: true
+        default: 'all'
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: clone repos
+        env:
+          SYNC_REPO: ${{ github.event.inputs.repo }}
+        run: node ./scripts/getPublicRepos.mjs
+
+      - name: Upload to R2
+        env:
+          CLOUDFLARE_R2_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_R2_ACCOUNT_ID }}
+          CLOUDFLARE_R2_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          CLOUDFLARE_R2_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+          CLOUDFLARE_R2_BUCKET: ${{ secrets.CLOUDFLARE_R2_BUCKET }}
+        run: |
+          curl -fsSL https://rclone.org/install.sh | sudo bash
+          export RCLONE_CONFIG_R2_TYPE=s3
+          export RCLONE_CONFIG_R2_PROVIDER=Cloudflare
+          export RCLONE_CONFIG_R2_ACCESS_KEY_ID="$CLOUDFLARE_R2_ACCESS_KEY_ID"
+          export RCLONE_CONFIG_R2_SECRET_ACCESS_KEY="$CLOUDFLARE_R2_SECRET_ACCESS_KEY"
+          export RCLONE_CONFIG_R2_ENDPOINT="https://${CLOUDFLARE_R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+          export RCLONE_CONFIG_R2_REGION="auto"
+          export RCLONE_CONFIG_R2_NO_CHECK_BUCKET="true"
+          export RCLONE_CONFIG_R2_FORCE_PATH_STYLE="true"
+
+          for repo_dir in repos/*; do
+            if [ -d "$repo_dir" ]; then
+              repo_name=$(basename "$repo_dir")
+
+              echo "Uploading ${repo_name}..."
+
+              rclone copy "$repo_dir/" "r2:${CLOUDFLARE_R2_BUCKET}/repos/${repo_name}" --progress --no-traverse
+            fi
+          done
