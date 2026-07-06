@@ -20,9 +20,9 @@ const gitRepo = useGitRepo(repoName.value);
 const { allFiles, switchBranch, currentBranch, branches, tags } = gitRepo;
 provide<ReturnType<typeof useGitRepo>>('gitRepo', gitRepo);
 
-watch(branch, (newBranch) => {
+watch(branch, async (newBranch) => {
   if (newBranch && newBranch !== currentBranch.value) {
-    void switchBranch(newBranch);
+    await switchBranch(newBranch);
   }
 }, { immediate: true });
 

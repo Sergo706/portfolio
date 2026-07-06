@@ -56,10 +56,10 @@ watch(() => gitRepo.loading.value, (isLoading) => {
   }
 }, { immediate: true });
 
-watch(selectedBranch, (newBranch, oldBranch) => {
+watch(selectedBranch, async (newBranch, oldBranch) => {
   if (newBranch && newBranch !== oldBranch && !gitRepo.loading.value) {
     if (newBranch !== props.branch) {
-      void gitRepo.switchBranch(newBranch);
+      await gitRepo.switchBranch(newBranch);
     } else {
       currentPage.value = 1;
       void loadCommits();

@@ -17,9 +17,9 @@ const { files, fs, dir, repoName, lastCommit, commitCount, readme, license, load
 const timeAgo  = useTimeAgo(() => lastCommit.value?.date ?? new Date());
 const avatarUrl = useGitAvatar(lastCommit);
 
-watch(() => props.branch, (newBranch) => {
+watch(() => props.branch, async (newBranch) => {
   if (newBranch && newBranch !== currentBranch.value) {
-    void switchBranch(newBranch);
+    await switchBranch(newBranch);
   }
 }, { immediate: true });
 
