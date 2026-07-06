@@ -13,6 +13,19 @@ defineProps<{
     featured?: boolean;
   }[];
 }>();
+
+
+const repoSlug = (github: string) => {
+  try {
+    const url = new URL(github);
+    const parts = url.pathname.split('/').filter(Boolean);
+    const rawSlug = parts[parts.length - 1] ?? '';
+    return rawSlug;
+  } catch {
+    return '';
+  }
+};
+
 </script>
 
 
@@ -23,7 +36,7 @@ defineProps<{
       :key="project.name"
       role="link"
       class="flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 hover:bg-neutral-900"
-      :to="project.release === 'soon' ? '/' : project.link"
+      :to="project.release === 'soon' ? '/' : repoSlug(project.github) ? `/repo/${repoSlug(project.github)}` : project.link"
       :aria-label="'go to ' + project.name + ' project website'"
       :target="project.release === 'soon' ? '_self' : '_blank'"
     >

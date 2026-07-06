@@ -12,7 +12,7 @@ const slug = computed(() => {
 
 const repoName = computed(() => slug.value[0] ?? '');
 
-const { data: projects } = await useAsyncData('projects', async () => {
+const { data: projects } = await useAsyncData(`project-${repoName.value}`, async () => {
   return await queryCollection('projects')
     .where('github', 'LIKE', `%/${repoName.value}`)
     .first();
