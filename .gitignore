@@ -18,3 +18,4 @@ rt_base
 .history
 .env*.local
 repo.md
+repos/*

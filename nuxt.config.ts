@@ -30,6 +30,7 @@ export default defineNuxtConfig({
   devtools: {
     enabled: true,
   },
+  telemetry: false,
 
   css: ['~/assets/style/main.css'],
 
@@ -46,7 +47,29 @@ export default defineNuxtConfig({
 
   mdc: {
     highlight: {
-      langs: ['pascal'],
+      langs: [
+        'ts',
+        'js',
+        "mjs",
+        "mts",
+        'vue',
+        'diff',
+        'pascal',
+        'docker',
+        "py",
+        'json',
+        "yml",
+        'yaml',
+        'dockerfile',
+        'dotenv',
+        'bash',
+        "sh",
+        'html',
+        'css',
+        "xml",
+        'md',
+        'sql',
+      ],
       theme: {
         dark: 'github-dark',
         default: 'github-dark',
@@ -71,6 +94,7 @@ export default defineNuxtConfig({
       autoSubfolderIndex: false,
       crawlLinks: true,
       routes: ['/'],
+      ignore: ['/repo/**'],
     },
     preset: "cloudflare-pages",
     cloudflare: {
@@ -86,6 +110,9 @@ export default defineNuxtConfig({
         dir: './app/assets/icons',
       },
     ],
+    serverBundle: {
+      collections: ['vscode-icons', 'lucide'],
+    },
     clientBundle: {
       scan: true,
       includeCustomCollections: true,

@@ -15,7 +15,8 @@ if (!fs.existsSync(targetDir)) {
 const toSync = targetRepo && targetRepo !== 'all' ? repos.filter(r => r.name === targetRepo) : repos;
 
 for (const repo of toSync) {
-  const repoPath = path.join(targetDir, `${repo.name}.git`);
+  const repoNameLower = repo.name.toLowerCase();
+  const repoPath = path.join(targetDir, `${repoNameLower}.git`);
   console.log(`Fetching ${repo.name}...`);
   
   try {

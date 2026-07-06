@@ -1,24 +1,34 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-defineProps<{
+const props = defineProps<{
   project: {
     name: string;
     release: string;
     image: string;
-    link?: string;
     github: string;
     npm?: string;
     description?: string;
   };
 }>();
+
 const img = useImage();
+const repoSlug = computed(() => {
+  try {
+    const url = new URL(props.project.github);
+    const parts = url.pathname.split('/').filter(Boolean);
+    const rawSlug = parts[parts.length - 1] ?? '';
+    return rawSlug;
+  } catch {
+    return '';
+  }
+});
+
 </script>
 
 <template>
   <NuxtLink
     :aria-label="project.name + ' project link'"
-    :to="project.link ?? project.github"
-    target="_blank"
+    :to="repoSlug ? `/repo/${repoSlug}` : project.github"
     class="group relative flex cursor-pointer flex-col gap-1 rounded-lg border border-white/10 bg-zinc-900/80 p-1 shadow-2xl shadow-zinc-950/50 backdrop-blur-sm"
   >
     <div class="flex items-center justify-center py-[3px]">
@@ -53,7 +63,7 @@ const img = useImage();
         </NuxtLink>
       </div>
     </div>
-    <!-- Image and Hover Description Overlay -->
+
     <div class="relative flex h-56 justify-center overflow-hidden rounded-lg">
       <NuxtImg
         :placeholder="img(`${project.image}`)"
@@ -63,7 +73,7 @@ const img = useImage();
         :src="project.image"
         :aria-label="project.name + ' project image'"
       />
-      <!-- Hover Description -->
+
       <div
         v-if="project.description"
         class="absolute inset-0 flex items-center justify-center p-6 text-center text-sm text-white/90 drop-shadow-md opacity-0 translate-y-8 transition-all duration-500 ease-out group-hover:translate-y-0 group-hover:opacity-100"

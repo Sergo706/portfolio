@@ -8,6 +8,7 @@ export default defineConfig(
       '.nuxt/**',
       '.output/**',
       'dist/**',
+      'scripts/**',
       'node_modules/**',
       '*.config.*',
       '**/*.{yml,sh,json,txt,age,md}',

@@ -1,4 +1,6 @@
 import type { R2Bucket } from "@cloudflare/workers-types";
+import fs from "node:fs";
+import path from "node:path";
 
 export default defineEventHandler(async (event) => {
   const filePath = event.context.params?.path;
@@ -9,7 +11,41 @@ export default defineEventHandler(async (event) => {
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   const bucket = event.context.cloudflare?.env?.R2_BUCKET as R2Bucket | undefined;
+  
   if (!bucket) {
+    if (process.env.NODE_ENV === 'development') {
+      const baseDir = path.resolve(process.cwd(), 'repos');
+      const localPath = path.resolve(baseDir, filePath);
+      
+      if (!localPath.startsWith(baseDir)) {
+        throw createError({ statusCode: 403, message: 'Forbidden' });
+      }
+
+      let resolvedPath = localPath;
+      if (!fs.existsSync(resolvedPath)) {
+        const parts = filePath.split('/');
+        const repoFolder = parts[0];
+        
+        if (repoFolder) {
+          const reposDirEntries = fs.readdirSync(baseDir);
+          const matchedRepoFolder = reposDirEntries.find(
+            (entry) => entry.toLowerCase() === repoFolder.toLowerCase()
+          );
+          
+          if (matchedRepoFolder) {
+            parts[0] = matchedRepoFolder;
+            resolvedPath = path.resolve(baseDir, parts.join('/'));
+          }
+        }
+      }
+
+      if (!fs.existsSync(resolvedPath) || fs.statSync(resolvedPath).isDirectory()) {
+        throw createError({ statusCode: 404, message: 'Not Found' });
+      }
+      
+      return sendStream(event, fs.createReadStream(resolvedPath));
+    }
+
     console.log("The R2 binding is missing");
     throw createError({ statusCode: 500, message: 'Server Error' });
   }
