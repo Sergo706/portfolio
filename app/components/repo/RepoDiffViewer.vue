@@ -41,7 +41,7 @@ onMounted(async () => {
         variant="ghost"
         size="sm"
         label="Back to Commits"
-        @click="$router.back()"
+        @click.prevent="goBack(`/repo/${repoName}`)"
       />
     </div>
 

@@ -19,7 +19,7 @@ const avatarUrl = useGitAvatar(lastCommit);
 
 watch(() => props.branch, async (newBranch) => {
   if (newBranch && newBranch !== currentBranch.value) {
-    await switchBranch(newBranch);
+    await switchBranch(newBranch, true);
   }
 }, { immediate: true });
 

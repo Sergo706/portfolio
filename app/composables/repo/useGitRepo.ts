@@ -2,8 +2,25 @@ import git from 'isomorphic-git';
 import LightningFS from '@isomorphic-git/lightning-fs';
 import { syncBareRepo, wipeDir } from '~/utils/useFs';
 import type { GitFile, GitCommit } from '~~/shared/types/Git';
+import { MiniCache } from '@riavzon/utils';
+
+const gitRepoCache = new MiniCache<ReturnType<typeof createGitRepo>>();
 
 export function useGitRepo(repoName: string, initialBranch?: string) {
+  let repo = gitRepoCache.get(repoName);
+  if (!repo) {
+    repo = createGitRepo(repoName, initialBranch);
+    gitRepoCache.set(repoName, repo, 3600000);
+  }
+
+  if (initialBranch && !repo.currentBranch.value && !repo.loading.value) {
+    repo.currentBranch.value = initialBranch;
+  }
+  return repo;
+}
+
+function createGitRepo(repoName: string, initialBranch?: string) {
+  let gitCache = {};
   const files = ref<GitFile[]>([]);
   const allFiles = ref<string[]>([]);
   const lastCommit = ref<GitCommit | null>(null);
@@ -16,7 +33,6 @@ export function useGitRepo(repoName: string, initialBranch?: string) {
   const branches = ref<string[]>([]);
   const tags = ref<string[]>();
   
-  const route = useRoute();
   const router = useRouter();
 
   const fsName = `portfolio-${repoName}`;
@@ -24,6 +40,8 @@ export function useGitRepo(repoName: string, initialBranch?: string) {
   const corsProxy = '/api/git-proxy';
   const repoUrl = import.meta.client ? `${window.location.origin}${corsProxy}/${repoName}.git` : '';
   const fs = new LightningFS(fsName);
+  
+  const clearCache = () => { gitCache = {}; };
 
   async function init() {
     loading.value = true;
@@ -45,7 +63,7 @@ export function useGitRepo(repoName: string, initialBranch?: string) {
 
       tags.value = await git.listTags({ fs, dir });
 
-      const fileList = await git.listFiles({ fs, dir, ref: currentBranch.value });
+      const fileList = await git.listFiles({ fs, dir, ref: currentBranch.value, cache: gitCache });
       allFiles.value = fileList;
       const fileMap = new Map<string, GitFile>();
       const dirSet = new Set<string>();
@@ -79,7 +97,7 @@ export function useGitRepo(repoName: string, initialBranch?: string) {
 
       await Promise.all(items.map(async (item) => {
         try {
-          const logs = await git.log({ fs, dir, filepath: item.path, depth: 1, ref: currentBranch.value });
+          const logs = await git.log({ fs, dir, filepath: item.path, depth: 1, ref: currentBranch.value, cache: gitCache });
           const commit = logs[0];
           if (commit) {
             item.commit = {
@@ -97,7 +115,7 @@ export function useGitRepo(repoName: string, initialBranch?: string) {
 
       files.value = items;
 
-      const repoLogs = await git.log({ fs, dir, ref: currentBranch.value });
+      const repoLogs = await git.log({ fs, dir, ref: currentBranch.value, cache: gitCache });
       commitCount.value = repoLogs.length;
 
       const repoCommit = repoLogs[0];
@@ -115,7 +133,7 @@ export function useGitRepo(repoName: string, initialBranch?: string) {
       if (fileList.includes(licenseFile)) {
         try {
           const commitOid = await git.resolveRef({ fs, dir, ref: currentBranch.value });
-          const { blob } = await git.readBlob({ fs, dir, oid: commitOid, filepath: licenseFile });
+          const { blob } = await git.readBlob({ fs, dir, oid: commitOid, filepath: licenseFile, cache: gitCache });
           license.value = new TextDecoder().decode(blob);
         } catch { }
       }
@@ -125,7 +143,7 @@ export function useGitRepo(repoName: string, initialBranch?: string) {
         if (fileList.includes(candidate)) {
           try {
             const commitOid = await git.resolveRef({ fs, dir, ref: currentBranch.value });
-            const { blob } = await git.readBlob({ fs, dir, oid: commitOid, filepath: candidate });
+            const { blob } = await git.readBlob({ fs, dir, oid: commitOid, filepath: candidate, cache: gitCache });
             readme.value = new TextDecoder().decode(blob);
           } catch { }
           break;
@@ -145,20 +163,26 @@ export function useGitRepo(repoName: string, initialBranch?: string) {
   }
 
 
-  async function switchBranch(branchName: string) {
+async function switchBranch(branchName: string, skipRoute = false) {
     if (branchName === currentBranch.value) return;
     
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (route && router) {
-      const slug = Array.isArray(route.params.slug) ? route.params.slug : [route.params.slug];
-      const viewType = slug[1] ?? 'main';
+    if (!skipRoute && router) {
+      const currentPath = router.currentRoute.value.path;
       
-      if (['tree', 'blob', 'commits'].includes(viewType)) {
-        const newSlug = [...slug];
-        newSlug[2] = branchName;
-        void router.push(`/repo/${repoName}/${newSlug.slice(1).join('/')}`);
+      const parts = currentPath.split('/').filter(Boolean);
+      const viewType = parts[2] ?? '';
+      let newPath = '';
+
+      if (['tree', 'blob', 'commits', 'commit'].includes(viewType)) {
+        parts[3] = branchName;
+        newPath = '/' + parts.join('/');
       } else {
-        void router.push(`/repo/${repoName}/tree/${branchName}`);
+        newPath = `/repo/${repoName}/tree/${branchName}`;
+      }
+
+      if (currentPath !== newPath) {
+        void router.push(newPath);
       }
     }
 
@@ -169,7 +193,7 @@ export function useGitRepo(repoName: string, initialBranch?: string) {
   async function getPathCommit(filepath: string, branch?: string): Promise<GitCommit | null> {
     try {
       const ref = branch ?? currentBranch.value;
-      const logs = await git.log({ fs, dir, filepath, depth: 1, ref });
+      const logs = await git.log({ fs, dir, filepath, depth: 1, ref, cache: gitCache });
       const commit = logs[0];
       if (commit) {
         return {
@@ -188,7 +212,7 @@ export function useGitRepo(repoName: string, initialBranch?: string) {
 
   async function getFilesInFolder(folderPath: string | undefined, branch?: string): Promise<GitFile[]> {
     const ref = branch ?? currentBranch.value;
-    const fileList = await git.listFiles({ fs, dir, ref }).catch(() => [] as string[]);
+    const fileList = await git.listFiles({ fs, dir, ref, cache: gitCache }).catch(() => [] as string[]);
     
     const prefix = folderPath ? folderPath + '/' : '';
     const fileMap = new Map<string, GitFile>();
@@ -225,7 +249,7 @@ export function useGitRepo(repoName: string, initialBranch?: string) {
 
     await Promise.all(items.map(async (item) => {
       try {
-        const logs = await git.log({ fs, dir, filepath: item.path, depth: 1, ref });
+        const logs = await git.log({ fs, dir, filepath: item.path, depth: 1, ref, cache: gitCache });
         const commit = logs[0];
         if (commit) {
           item.commit = {
@@ -248,7 +272,7 @@ export function useGitRepo(repoName: string, initialBranch?: string) {
     try {
       const ref = branch ?? currentBranch.value;
       const commitOid = await git.resolveRef({ fs, dir, ref });
-      const { blob } = await git.readBlob({ fs, dir, oid: commitOid, filepath });
+      const { blob } = await git.readBlob({ fs, dir, oid: commitOid, filepath, cache: gitCache });
       return new TextDecoder().decode(blob);
     } catch (e) {
       console.warn(`Failed to fetch file content for ${filepath}`, e);
@@ -260,7 +284,7 @@ export function useGitRepo(repoName: string, initialBranch?: string) {
     try {
       const ref = branch ?? currentBranch.value;
       const commitOid = await git.resolveRef({ fs, dir, ref });
-      const { blob } = await git.readBlob({ fs, dir, oid: commitOid, filepath });
+      const { blob } = await git.readBlob({ fs, dir, oid: commitOid, filepath, cache: gitCache });
       return blob;
     } catch (e) {
       console.warn(`Failed to fetch file blob for ${filepath}`, e);
@@ -271,7 +295,7 @@ export function useGitRepo(repoName: string, initialBranch?: string) {
   async function getAllCommits(branch?: string, filepath?: string): Promise<GitCommit[]> {
     try {
       const ref = branch ?? currentBranch.value;
-      const logs = await git.log({ fs, dir, ref, filepath: filepath ?? undefined });
+      const logs = await git.log({ fs, dir, ref, filepath: filepath ?? undefined, cache: gitCache });
       return logs.map(commit => ({
         hash: commit.oid,
         message: commit.commit.message.trim(),
@@ -308,5 +332,6 @@ export function useGitRepo(repoName: string, initialBranch?: string) {
     getFileContent,
     getFileBlob,
     getAllCommits,
+    clearCache
   };
 }

@@ -22,7 +22,7 @@ provide<ReturnType<typeof useGitRepo>>('gitRepo', gitRepo);
 
 watch(branch, async (newBranch) => {
   if (newBranch && newBranch !== currentBranch.value) {
-    await switchBranch(newBranch);
+    await switchBranch(newBranch, true);
   }
 }, { immediate: true });
 

@@ -5,7 +5,7 @@ import type { GitCommit } from '~~/shared/types/Git';
 import CommitHistoryFilters from '~/components/repo/CommitHistoryFilters.vue';
 import RepoBreadcrumbs from '~/components/repo/RepoBreadcrumbs.vue';
 import CommitHistoryGroup from '~/components/repo/CommitHistoryGroup.vue';
-
+import { goBack } from '~/utils/goBack';
 const props = defineProps<{
   repoName: string;
   filePath?: string;
@@ -23,14 +23,14 @@ const isTree = computed(() => {
 
 const selectedBranch = ref(props.branch ?? 'main');
 
-watch(() => props.branch, (newBranch) => {
+watch(() => props.branch, async (newBranch) => {
   if (newBranch && newBranch !== selectedBranch.value) {
     selectedBranch.value = newBranch;
   }
   if (newBranch && newBranch !== gitRepo.currentBranch.value) {
-    gitRepo.currentBranch.value = newBranch;
+    await gitRepo.switchBranch(newBranch, true);
   }
-});
+}, { immediate: true });
 
 const selectedAuthor = ref<string>('All Authors');
 const selectedDate = ref<string>('');
@@ -59,7 +59,7 @@ watch(() => gitRepo.loading.value, (isLoading) => {
 watch(selectedBranch, async (newBranch, oldBranch) => {
   if (newBranch && newBranch !== oldBranch && !gitRepo.loading.value) {
     if (newBranch !== props.branch) {
-      await gitRepo.switchBranch(newBranch);
+      await gitRepo.switchBranch(newBranch, false);
     } else {
       currentPage.value = 1;
       void loadCommits();
@@ -112,8 +112,8 @@ const handlePageChange = (page: number) => {
         variant="ghost"
         size="sm"
         label="Back"
-        :to="`/repo/${repoName}`"
         aria-label="Back to repository"
+        @click.prevent="goBack(`/repo/${repoName}`)"
       />
     </div>
 
