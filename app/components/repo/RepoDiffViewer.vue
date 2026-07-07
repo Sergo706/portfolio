@@ -44,7 +44,7 @@ onMounted(async () => {
         @click.prevent="goBack(`/repo/${repoName}`)"
       />
     </div>
-
+    
     <UCard :ui="{ root: 'border border-white/10 bg-zinc-900/60 backdrop-blur-sm shadow-xl' }">
       <div
         v-if="fetching"

@@ -20,7 +20,9 @@ const lang = computed(() => {
 });
 
 const isWrapped = defineModel<boolean>();
+const showRawMd = defineModel<boolean>('showRawMd');
 const isMarkdown = computed(() => lang.value === 'md');
+
 const code = computed(() => {
   if (!isMarkdown.value) return `\`\`\`${lang.value}\n${props.content}\n\`\`\``;
   
@@ -42,7 +44,16 @@ const code = computed(() => {
       'overflow-x-auto': !isWrapped && !isMarkdown
     }"
   >
-    <MDC :value="code" />
+    <MDC 
+      v-if="!showRawMd"
+      :value="code"
+    />
+    <pre 
+      v-if="showRawMd && isMarkdown" 
+      class="p-4 overflow-auto text-sm font-mono text-white/80"
+      :class="{ 'whitespace-pre-wrap break-words': isWrapped, 'whitespace-pre': !isWrapped }"
+    >{{ code }}
+  </pre>
   </div>
 </template>
 

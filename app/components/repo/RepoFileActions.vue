@@ -11,6 +11,7 @@ const props = defineProps<{
 
 const emit = defineEmits(['wrapped']);
 const isWrapped = defineModel<boolean>();
+const showRawMd = defineModel<boolean>('showRawMd');
 const { copy, copied } = useClipboard();
 
 const mobileActionItems = computed(() => [
@@ -19,6 +20,13 @@ const mobileActionItems = computed(() => [
     icon: isWrapped.value ? 'i-lucide-align-left' : 'i-lucide-wrap-text',
     color: 'neutral' as const,
     onSelect: () => { emit('wrapped'); }
+  }] : []),
+
+  ...(props.isMd ? [{
+    label: showRawMd.value ? 'Original' : 'Raw',
+    icon: showRawMd.value ? 'i-lucide-file-text' : 'i-lucide-code',
+    color: 'neutral' as const,
+    onSelect: () => { showRawMd.value = !showRawMd.value; }
   }] : []),
   {
     label: 'Download',
@@ -63,6 +71,18 @@ const mobileActionItems = computed(() => [
           color="neutral"
           class="rounded-none border-r border-white/10 hover:bg-white/10"
           @click="emit('wrapped')"
+        />
+      </UTooltip>
+      <UTooltip
+        v-if="isMd"
+        :text="showRawMd ? 'Original' : 'Raw'"
+      >
+        <UButton
+          :icon="showRawMd ? 'i-lucide-file-text' : 'i-lucide-code'"
+          variant="ghost"
+          color="neutral"
+          class="rounded-none border-r border-white/10 hover:bg-white/10"
+          @click="showRawMd = !showRawMd"
         />
       </UTooltip>
       <UTooltip text="Download">
