@@ -1,11 +1,17 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
 import { useGitRepo } from '~/composables/repo/useGitRepo';
 import type { GitCommit } from '~~/shared/types/Git';
 import CommitHistoryFilters from '~/components/repo/CommitHistoryFilters.vue';
 import RepoBreadcrumbs from '~/components/repo/RepoBreadcrumbs.vue';
 import CommitHistoryGroup from '~/components/repo/CommitHistoryGroup.vue';
 import { goBack } from '~/utils/goBack';
+import { getLocalTimeZone, type CalendarDate } from '@internationalized/date';
+
+interface DateRange { 
+  start: CalendarDate | undefined; 
+  end: CalendarDate | undefined 
+}
+
 const props = defineProps<{
   repoName: string;
   filePath?: string;
@@ -33,9 +39,12 @@ watch(() => props.branch, async (newBranch) => {
 }, { immediate: true });
 
 const selectedAuthor = ref<string>('All Authors');
-const selectedDate = ref<string>('');
 
-  const currentPage = ref(1);
+
+const selectedDateRange = shallowRef<DateRange | undefined>(undefined);
+const tz = getLocalTimeZone();
+
+const currentPage = ref(1);
 const itemsPerPage = 10; 
 
 const loadCommits = async () => {
@@ -67,7 +76,7 @@ watch(selectedBranch, async (newBranch, oldBranch) => {
   }
 });
 
-watch([selectedAuthor, selectedDate], () => {
+watch([selectedAuthor, selectedDateRange], () => {
   currentPage.value = 1;
 });
 
@@ -82,9 +91,29 @@ const authors = computed(() => {
 const filteredCommits = computed(() => {
   return allCommits.value.filter(c => {
     if (selectedAuthor.value !== 'All Authors' && c.author !== selectedAuthor.value) return false;
-    if (selectedDate.value) {
-      const commitDateStr = c.date.toISOString().split('T')[0];
-      if (commitDateStr !== selectedDate.value) return false;
+    
+    if (selectedDateRange.value?.start) {
+      const commitTime = c.date.getTime();
+
+      const startDate = selectedDateRange.value.start.toDate(tz);
+      startDate.setHours(0, 0, 0, 0);
+      const startTime = startDate.getTime();
+
+      let endTime = startTime; 
+      
+      if (selectedDateRange.value.end) {
+        const endDate = selectedDateRange.value.end.toDate(tz);
+        endDate.setHours(23, 59, 59, 999);
+        endTime = endDate.getTime();
+      } else {
+        const endDate = new Date(startTime);
+        endDate.setHours(23, 59, 59, 999);
+        endTime = endDate.getTime();
+      }
+
+      if (commitTime < startTime || commitTime > endTime) {
+        return false;
+      }
     }
     return true;
   });
@@ -158,7 +187,7 @@ const handlePageChange = (page: number) => {
     <CommitHistoryFilters
       v-model:branch="selectedBranch"
       v-model:author="selectedAuthor"
-      v-model:date="selectedDate"
+      v-model:date-range="selectedDateRange"
       :authors="authors"
       :tags="gitRepo.tags.value || []"
       :branches="gitRepo.branches.value || []"

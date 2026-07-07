@@ -4,13 +4,13 @@ import { syncBareRepo, wipeDir } from '~/utils/useFs';
 import type { GitFile, GitCommit } from '~~/shared/types/Git';
 import { MiniCache } from '@riavzon/utils';
 
-const gitRepoCache = new MiniCache<ReturnType<typeof createGitRepo>>();
+const gitRepoCache = new MiniCache<ReturnType<typeof createGitRepo>>(10);
 
 export function useGitRepo(repoName: string, initialBranch?: string) {
   let repo = gitRepoCache.get(repoName);
   if (!repo) {
     repo = createGitRepo(repoName, initialBranch);
-    gitRepoCache.set(repoName, repo, 3600000);
+    gitRepoCache.set(repoName, repo, Infinity);
   }
 
   if (initialBranch && !repo.currentBranch.value && !repo.loading.value) {

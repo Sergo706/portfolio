@@ -11,7 +11,7 @@ const props = defineProps<{
   isTree?: boolean;
 }>();
 
-const { copy } = useClipboard();
+const { copy, copied, text } = useClipboard();
 
 const copyHash = (hash: string) => {
   void copy(hash);
@@ -54,22 +54,25 @@ const groupedCommits = computed(() => {
     
     <UTimeline
       :items="group.commits.map(c => ({ 
-        title: c.message.split('\n')[0] || 'No message',
+        title: c.message || 'No message',
         avatar: {
           src: useGitAvatar(ref(c)).value,
           loading: 'lazy' as const
         },
         ...c,
-        date: c.date.toISOString()
+        date: new Date(c.date).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })
       }))"
-      class="ml-2"
+      :ui="{ wrapper: 'min-w-0', title: 'line-clamp-2' }"
+      class="ml-2 mr-2 p-2"
     >
       <template #description="{ item }">
-        <div class="flex flex-col gap-2 pb-6 mt-1">
-          <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-white/50">
-            <div class="flex items-center gap-1.5">
-              <span class="font-medium text-white/70">{{ item.author }}</span>
-              <span>committed on {{ new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) }}</span>
+        <div class="flex flex-col gap-2 pb-6 mt-1 min-w-0">
+          <div class="flex items-center gap-x-4 gap-y-2 text-xs text-white/50 min-w-0 w-full">
+            <div class="flex items-center gap-1.5 min-w-0 flex-1">
+              <span class="font-medium text-white/70 shrink-0">{{ item.author }}</span>
+              <span class="truncate min-w-0">
+                committed on {{ new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) }}
+              </span>
             </div>
           </div>
             
@@ -88,17 +91,8 @@ const groupedCommits = computed(() => {
               </UButton>
             </UTooltip>
               
-            <UTooltip text="Copy Hash">
-              <UButton
-                color="neutral"
-                variant="ghost"
-                size="xs"
-                icon="i-lucide-copy"
-                @click="copyHash(item.hash)"
-              />
-            </UTooltip>
               
-            <UTooltip text="Browse Repo at this Commit">
+            <UTooltip text="Browse repository at this point">
               <UButton
                 :to="filePath ? `/repo/${repoName}/${isTree ? 'tree' : 'blob'}/${item.hash}/${filePath}` : `/repo/${repoName}/tree/${item.hash}`"
                 color="primary"
@@ -106,8 +100,18 @@ const groupedCommits = computed(() => {
                 size="xs"
                 icon="i-lucide-folder-git-2"
               >
-                Browse Repo
+                Browse Repository
               </UButton>
+            </UTooltip>
+            
+            <UTooltip :text="copied && text === item.hash ? 'Copied!' : 'Copy Hash'">
+              <UButton
+                :color="copied && text === item.hash ? 'success' : 'neutral'"
+                variant="ghost"
+                size="xs"
+                :icon="copied && text === item.hash ? 'i-lucide-check' : 'i-lucide-copy'"
+                @click="copyHash(item.hash)"
+              />
             </UTooltip>
           </div>
 
@@ -117,7 +121,7 @@ const groupedCommits = computed(() => {
               :items="[
                 { label: 'View Diff (' + item.hash.substring(0, 7) + ')', icon: 'i-lucide-git-commit-horizontal', to: `/repo/${repoName}/commit/${item.hash}` },
                 { label: 'Copy Hash', icon: 'i-lucide-copy', onSelect: () => copyHash(item.hash) },
-                { label: 'Browse Repo', icon: 'i-lucide-folder-git-2', color: 'primary', to: filePath ? `/repo/${repoName}/${isTree ? 'tree' : 'blob'}/${item.hash}/${filePath}` : `/repo/${repoName}/tree/${item.hash}` }
+                { label: 'Browse Repo At This Point', icon: 'i-lucide-folder-git-2', color: 'primary', to: filePath ? `/repo/${repoName}/${isTree ? 'tree' : 'blob'}/${item.hash}/${filePath}` : `/repo/${repoName}/tree/${item.hash}` }
               ]"
             >
               <UButton
