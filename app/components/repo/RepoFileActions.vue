@@ -82,7 +82,7 @@ const mobileActionItems = computed(() => [
           variant="ghost"
           color="neutral"
           class="rounded-none border-r border-white/10 hover:bg-white/10"
-          @click="showRawMd = !showRawMd"
+          @click="() => { showRawMd = !showRawMd }"
         />
       </UTooltip>
       <UTooltip text="Download">
