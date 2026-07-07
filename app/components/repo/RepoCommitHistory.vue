@@ -125,7 +125,7 @@ const handlePageChange = (page: number) => {
       }"
     >
       <template #description>
-        <div class="flex items-center gap-2 mt-2">
+        <div class="flex-col sm:flex-row sm:items-center gap-4 mt-2">
           <span class="text-white/50">History for</span>
           <RepoBreadcrumbs
             v-if="filePath"
@@ -147,7 +147,7 @@ const handlePageChange = (page: number) => {
             variant="subtle"
             color="neutral"
             size="lg"
-            class="font-mono"
+            class="font-mono ml-1 mt-2"
           >
             {{ selectedBranch }}
           </UBadge>
