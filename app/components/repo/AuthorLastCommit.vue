@@ -18,16 +18,16 @@ defineProps<{
 <template>
   <div
     v-if="lastCommit"
-    class="flex flex-wrap items-center gap-3"
+    class="flex flex-wrap items-center gap-2"
   >
-    <UAvatar
-      :src="avatarUrl"
-      :alt="lastCommit.author"
+    <UUser
+      :name="lastCommit.author"
+      :avatar="{ 
+        src: avatarUrl,
+        alt: lastCommit.author
+      }"
       size="xs"
     />
-    <span class="text-sm text-white/80">
-      {{ lastCommit.author }}
-    </span>
 
     <NuxtLink
       :to="`/repo/${repoName}/commit/${lastCommit.hash}`"
@@ -42,13 +42,12 @@ defineProps<{
     >
       <UBadge
         :label="lastCommit.hash.slice(0, 7)"
-        variant="subtle"
-        color="neutral"
+        variant="outline"
         class="font-mono text-xs"
       />
     </NuxtLink>
 
-    <div class="mt-2 flex w-full items-center justify-between gap-3 sm:mt-0 sm:w-auto sm:ml-auto">
+    <div class="mt-2 flex w-full items-center  gap-3 sm:mt-0 sm:w-auto sm:ml-auto">
       <span class="text-xs text-white/40">
         {{ timeAgo }}
       </span>

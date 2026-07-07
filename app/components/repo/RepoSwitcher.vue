@@ -47,7 +47,7 @@ watch(() => props.repoName, (newVal) => {
     :items="filteredItems"
     :search-input="false"
     ignore-filter
-    class="w-full md:w-54"
+    class="w-54"
     @update:model-value="onChange"
   >
     <template #content-top>

@@ -7,7 +7,6 @@ const props = defineProps<{
 }>();
 
 const gitRepo = inject<ReturnType<typeof useGitRepo>>('gitRepo');
-
 const lang = computed(() => {
   const name = props.filePath.split('/').pop()?.toLowerCase() ?? '';
   if (name.endsWith('.md')) return 'md';
@@ -20,6 +19,7 @@ const lang = computed(() => {
   return name.split('.').pop() ?? 'text';
 });
 
+const isWrapped = defineModel<boolean>();
 const isMarkdown = computed(() => lang.value === 'md');
 const code = computed(() => {
   if (!isMarkdown.value) return `\`\`\`${lang.value}\n${props.content}\n\`\`\``;
@@ -31,13 +31,16 @@ const code = computed(() => {
     .replace(/!\[(.*?)\]\((?!http)(.*?)\)/g, `![$1](${baseUrl}$2)`)
     .replace(/<img([^>]+)src=["'](?!http)(.*?)["']/g, `<img$1src="${baseUrl}$2"`);
 });
-
 </script>
-
 <template>
   <div
-    class="file-viewer overflow-x-auto text-sm w-full"
-    :class="{ 'is-code': !isMarkdown, 'markdown-body prose dark:prose-invert max-w-none': isMarkdown }"
+    class="file-viewer text-sm w-full"
+    :class="{ 
+      'is-code': !isMarkdown, 
+      'markdown-body prose dark:prose-invert max-w-none': isMarkdown,
+      'force-wrap': isWrapped,
+      'overflow-x-auto': !isWrapped && !isMarkdown
+    }"
   >
     <MDC :value="code" />
   </div>
@@ -45,41 +48,18 @@ const code = computed(() => {
 
 <style scoped>
 .file-viewer.markdown-body {
-  padding: 2rem;
+  padding: 1rem;
 }
 
-.file-viewer.is-code :deep(pre) {
-  counter-reset: line;
-  padding: 0.2rem 0;
-  margin: 0;
-  background: transparent !important;
-  border: none !important;
-  border-radius: 0;
+.file-viewer.markdown-body :deep(pre) {
+  white-space: pre-wrap !important;
+  word-break: break-word;
 }
 
-.file-viewer.is-code :deep(pre code) {
-  display: block;
-  min-width: 100%;
+.file-viewer.markdown-body :deep(pre code) {
+  white-space: pre-wrap !important;
 }
 
-.file-viewer.is-code :deep(pre code .line) {
-  display: block;
-  min-width: 100%;
-  width: max-content;
-}
-
-.file-viewer.is-code :deep(pre code .line::before) {
-  counter-increment: line;
-  content: counter(line);
-  display: inline-block;
-  width: 2rem;
-  margin-right: 1.3rem;
-  text-align: right;
-  color: rgba(255, 255, 255, 0.3);
-  user-select: none;
-}
-
-/* images in the first paragraph or inside links */
 .file-viewer.markdown-body :deep(p:first-of-type img),
 .file-viewer.markdown-body :deep(a img),
 .file-viewer.markdown-body :deep(img[src*="badge"]),
@@ -94,19 +74,65 @@ const code = computed(() => {
   max-width: 100%;
 }
 
+.file-viewer.is-code :deep(pre) {
+  counter-reset: line;
+  padding: 0rem 0 1rem 0;
+  margin: 0;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0;
+}
+
 .file-viewer.is-code :deep(.group > button) {
   display: none !important;
 }
 
-.file-viewer.is-code :deep(pre) {
-  overflow-x: auto !important;
-  white-space: pre !important;
+.file-viewer.is-code :deep(pre code) {
+  display: block;
+  min-width: 100%;
+  line-height: 0; 
 }
 
-.file-viewer.is-code :deep(pre code),
 .file-viewer.is-code :deep(pre code .line) {
-  white-space: pre !important;
+  display: block;
+  position: relative;
+  padding-left: 3rem; 
+  line-height: 1.5;
+  min-height: 1.5em;
 }
+
+.file-viewer.is-code :deep(pre code .line::before) {
+  counter-increment: line;
+  content: counter(line);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 2.25rem; 
+  text-align: right;
+  color: rgba(255, 255, 255, 0.3);
+  user-select: none;
+}
+
+
+.file-viewer.is-code:not(.force-wrap) :deep(pre) {
+  overflow-x: auto !important; 
+}
+.file-viewer.is-code:not(.force-wrap) :deep(pre code .line) {
+  white-space: pre !important;
+  width: max-content;
+  min-width: 100%;
+}
+
+
+.file-viewer.is-code.force-wrap :deep(pre) {
+  overflow-x: hidden !important; 
+}
+.file-viewer.is-code.force-wrap :deep(pre code .line) {
+  white-space: pre-wrap !important;
+  word-break: break-word;
+  width: 100%;
+}
+
 
 .file-viewer,
 .file-viewer :deep(*) {
@@ -116,7 +142,8 @@ const code = computed(() => {
 
 .file-viewer::-webkit-scrollbar,
 .file-viewer :deep(*)::-webkit-scrollbar {
-  height: 4px;
+  height: 6px; 
+  width: 6px;
 }
 
 .file-viewer::-webkit-scrollbar-track,
@@ -134,5 +161,4 @@ const code = computed(() => {
 .file-viewer :deep(*)::-webkit-scrollbar-thumb:hover {
   background-color: rgba(255, 255, 255, 0.4);
 }
-
 </style>

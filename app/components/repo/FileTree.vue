@@ -35,7 +35,7 @@ defineProps<{
 
       <div
         v-if="file.commit"
-        class="flex items-center justify-between gap-4 text-xs text-white/50 truncate min-w-0 flex-1 pl-7 sm:pl-0"
+        class="flex items-center justify-between text-xs text-white/50 pt-1 truncate min-w-0 flex-1 pl-0 sm:pt-0"
       >
         <div class="flex items-center gap-2 truncate min-w-0">
           <UAvatar

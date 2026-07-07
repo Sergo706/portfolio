@@ -115,6 +115,8 @@ watchEffect(() => {
 });
 
 const isLoading = computed(() => loading.value || fetching.value);
+const isCodeWrapped = ref(false);
+const isMd = computed(() => props.filePath?.endsWith('.md') ?? false);
 </script>
 
 <template>
@@ -220,9 +222,12 @@ const isLoading = computed(() => loading.value || fetching.value);
 
           <RepoFileActions
             v-if="!isTree"
+            v-model="isCodeWrapped"
             :file-content="fileContent"
+            :is-md="isMd"
             :github-url="githubUrl"
             :download-file="downloadFile"
+            @wrapped="isCodeWrapped = !isCodeWrapped"
           />
         </div>
       </template>
@@ -263,6 +268,7 @@ const isLoading = computed(() => loading.value || fetching.value);
       </div>
       <BlobViewer
         v-else-if="fileContent !== null"
+        v-model="isCodeWrapped"
         :content="fileContent"
         :file-path="filePath || ''"
       />

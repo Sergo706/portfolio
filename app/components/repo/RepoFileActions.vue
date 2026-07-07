@@ -5,12 +5,21 @@ import { useClipboard } from '@vueuse/core';
 const props = defineProps<{
   fileContent: string | null;
   githubUrl: string;
+  isMd: boolean;
   downloadFile: () => void;
 }>();
 
+const emit = defineEmits(['wrapped']);
+const isWrapped = defineModel<boolean>();
 const { copy, copied } = useClipboard();
 
 const mobileActionItems = computed(() => [
+  ...(!props.isMd ? [{
+    label: isWrapped.value ? 'Unwrap Code' : 'Wrap Code',
+    icon: isWrapped.value ? 'i-lucide-align-left' : 'i-lucide-wrap-text',
+    color: 'neutral' as const,
+    onSelect: () => { emit('wrapped'); }
+  }] : []),
   {
     label: 'Download',
     icon: 'i-lucide-download',
@@ -38,11 +47,24 @@ const mobileActionItems = computed(() => [
     target: '_blank'
   }
 ]);
+
 </script>
 
 <template>
   <div class="flex items-center gap-2 shrink-0">
     <div class="hidden sm:flex items-center bg-white/5 rounded-lg overflow-hidden border border-white/10">
+      <UTooltip
+        v-if="!isMd"
+        :text="isWrapped ? 'Unwrap Code' : 'Wrap Code'"
+      >
+        <UButton
+          :icon="isWrapped ? 'i-lucide-align-left' : 'i-lucide-wrap-text'"
+          variant="ghost"
+          color="neutral"
+          class="rounded-none border-r border-white/10 hover:bg-white/10"
+          @click="emit('wrapped')"
+        />
+      </UTooltip>
       <UTooltip text="Download">
         <UButton
           icon="i-lucide-download"
