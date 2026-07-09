@@ -2,12 +2,15 @@
 import type { GitFile } from '~~/shared/types/Git';
 import { getIcon } from '~/utils/useTreeLinks';
 import { useTimeAgo } from '@vueuse/core';
+import { useGitAvatar } from '~/composables/repo/useGitAvatar';
 
+const getAvatar = (commit: GitCommit) => useGitAvatar(ref(commit)).value;
 defineProps<{
   files: GitFile[];
   repoName: string;
   currentBranch: string;
 }>();
+
 </script>
 
 <template>
@@ -38,12 +41,14 @@ defineProps<{
         class="flex items-center justify-between text-xs text-white/50 pt-1 truncate min-w-0 flex-1 pl-0 sm:pt-0"
       >
         <div class="flex items-center gap-2 truncate min-w-0">
-          <UAvatar
-            :src="`https://github.com/${file.commit.author}.png`"
-            :alt="file.commit.author"
+          <UUser
+            :name="file.commit.author"
+            :avatar="{ 
+              src: getAvatar(file.commit),
+              alt: file.commit.author
+            }"
             size="2xs"
           />
-          <span class="text-white/60 shrink-0">{{ file.commit.author }}</span>
           <NuxtLink
             :to="`/repo/${repoName}/commit/${file.commit.hash}`"
             class="truncate hover:text-white/70 hover:underline transition-colors"

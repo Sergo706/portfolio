@@ -10,6 +10,7 @@ import RepoFileActions from './RepoFileActions.vue';
 import RepoFileStats from './RepoFileStats.vue';
 import { useFileStats } from '~/utils/useFileStats.js';
 import { useDownloadFile, useIsImage } from '~/composables/repo/useDownload';
+import { useGitAvatar } from '~/composables/repo/useGitAvatar.js';
 
 const props = defineProps<{
   repoName: string;
@@ -36,7 +37,7 @@ const fileStats = useFileStats(fileContent);
 const githubUrl = computed(() => {
   return `https://github.com/Sergo706/${props.repoName}/blob/${props.branch}/${String(props.filePath)}`;
 });
-
+const avatarUrl = useGitAvatar(pathLastCommit);
 
 
 
@@ -53,7 +54,6 @@ watchEffect(() => {
   const fetchData = async () => {
     try {
       pathLastCommit.value = await getPathCommit(filePath, branch);
-
       if (imageBlobUrl.value) {
         URL.revokeObjectURL(imageBlobUrl.value);
         imageBlobUrl.value = null;
@@ -145,7 +145,7 @@ const showRawMd = ref(false);
     <AuthorLastCommit
       v-else-if="pathLastCommit"
       :last-commit="pathLastCommit"
-      :avatar-url="`https://github.com/${pathLastCommit.author}.png`"
+      :avatar-url="avatarUrl"
       :repo-name="repoName"
       class="text-white bg-transparent border border-zinc-800 shadow-sm p-4 rounded-lg"
       :time-ago="useTimeAgo(pathLastCommit.date).value"
