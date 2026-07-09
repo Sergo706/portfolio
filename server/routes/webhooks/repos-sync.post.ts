@@ -1,7 +1,22 @@
-import { Webhooks } from "@octokit/webhooks";
 import type { PushEvent } from "@octokit/webhooks-types";
 
+async function verifyGitHubSignature(secret: string, payload: string, signature: string) {
+  const encoder = new TextEncoder();
   
+  const key = await crypto.subtle.importKey("raw", encoder.encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+ 
+  const signatureBuffer = await crypto.subtle.sign("HMAC", key, encoder.encode(payload));
+  const hashArray = Array.from(new Uint8Array(signatureBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  const expectedSignature = `sha256=${hashHex}`;
+
+  return signature === expectedSignature;
+}
+
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig(event);
   const secret = config.webhookSecret;
@@ -14,7 +29,6 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const webhooks = new Webhooks({ secret });
   const signature = getHeader(event, "x-hub-signature-256");
   const textBody = await readRawBody(event, 'utf-8');
 
@@ -23,7 +37,9 @@ export default defineEventHandler(async (event) => {
     return;
   }
 
-  if (!(await webhooks.verify(textBody, signature))) {
+  const isValid = await verifyGitHubSignature(secret, textBody, signature);
+
+  if (!isValid) {
     setResponseStatus(event, 401, "Unauthorized");
     return;
   }
