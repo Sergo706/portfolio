@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/prefer-regexp-exec */
 import type { R2Bucket } from "@cloudflare/workers-types";
 import fs from "node:fs";
 import path from "node:path";
@@ -58,7 +59,15 @@ export default defineEventHandler(async (event) => {
   }
 
   setResponseHeader(event, 'etag', object.httpEtag);
-  setResponseHeader(event, 'cache-control', 'public, max-age=31536000, immutable');
+  const isPackFile = filePath.match(/objects\/pack\/pack-[a-f0-9]{40}\.(pack|idx|rev)$/);
+  const isLooseObject = filePath.match(/objects\/[a-f0-9]{2}\/[a-f0-9]{38}$/);
+  
+  if (isPackFile || isLooseObject) {
+    setResponseHeader(event, 'cache-control', 'public, max-age=31536000, immutable');
+  } else {
+    setResponseHeader(event, 'cache-control', 'public, max-age=60, stale-while-revalidate=86400');
+  }
+
   if (object.httpMetadata?.contentType) {
       setResponseHeader(event, 'content-type', object.httpMetadata.contentType);
   }
