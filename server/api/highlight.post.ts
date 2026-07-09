@@ -3,33 +3,46 @@ import { createOnigurumaEngine } from 'shiki/engine/oniguruma';
 import type { HighlighterCore } from 'shiki/core';
 import { MiniCache } from '@riavzon/utils';
 
-let highlighter: HighlighterCore | null = null;
 let highlightCache: MiniCache<string> | null = null;
+let highlighterPromise: Promise<HighlighterCore> | null = null;
 
-async function loadLangs() {
-  return Promise.all([
-    import('shiki/langs/typescript.mjs'),
-    import('shiki/langs/javascript.mjs'),
-    import('shiki/langs/mjs.mjs'),
-    import('shiki/langs/mts.mjs'),
-    import('shiki/langs/vue.mjs'),
-    import('shiki/langs/diff.mjs'),
-    import('shiki/langs/pascal.mjs'),
-    import('shiki/langs/docker.mjs'),
-    import('shiki/langs/python.mjs'),
-    import('shiki/langs/json.mjs'),
-    import('shiki/langs/yml.mjs'),
-    import('shiki/langs/yaml.mjs'),
-    import('shiki/langs/dockerfile.mjs'),
-    import('shiki/langs/dotenv.mjs'),
-    import('shiki/langs/bash.mjs'),
-    import('shiki/langs/sh.mjs'),
-    import('shiki/langs/html.mjs'),
-    import('shiki/langs/css.mjs'),
-    import('shiki/langs/xml.mjs'),
-    import('shiki/langs/markdown.mjs'),
-    import('shiki/langs/sql.mjs')
-  ]);
+function getHighlighter(): Promise<HighlighterCore> {
+  highlighterPromise ??= (async () => {
+      const [theme, ...langs] = await Promise.all([
+        import('shiki/themes/github-dark.mjs'),
+        import('shiki/langs/typescript.mjs'),
+        import('shiki/langs/javascript.mjs'),
+        import('shiki/langs/mjs.mjs'),
+        import('shiki/langs/mts.mjs'),
+        import('shiki/langs/vue.mjs'),
+        import('shiki/langs/diff.mjs'),
+        import('shiki/langs/pascal.mjs'),
+        import('shiki/langs/docker.mjs'),
+        import('shiki/langs/python.mjs'),
+        import('shiki/langs/json.mjs'),
+        import('shiki/langs/yml.mjs'),
+        import('shiki/langs/yaml.mjs'),
+        import('shiki/langs/dockerfile.mjs'),
+        import('shiki/langs/dotenv.mjs'),
+        import('shiki/langs/bash.mjs'),
+        import('shiki/langs/sh.mjs'),
+        import('shiki/langs/html.mjs'),
+        import('shiki/langs/css.mjs'),
+        import('shiki/langs/xml.mjs'),
+        import('shiki/langs/markdown.mjs'),
+        import('shiki/langs/sql.mjs')
+      ]);
+
+      return createHighlighterCore({
+        themes: [theme.default],
+        langs: langs.map(l => l.default),
+        engine: createOnigurumaEngine(async () => {
+          const wasm = await import('shiki/wasm');
+          return wasm.default;
+        })
+      });
+    })();
+  return highlighterPromise;
 }
 
 function resolveLang(filePath: string) {
@@ -64,22 +77,8 @@ export default defineEventHandler(async (event) => {
     return { html: cachedHtml };
   }
 
-  if (!highlighter) {
-    try {
-      highlighter = await createHighlighterCore({
-        themes: [
-          await import('shiki/themes/github-dark.mjs')
-        ],
-        langs: await loadLangs(),
-        engine: createOnigurumaEngine(import('shiki/wasm').then(m => m.default))
-      });
-    } catch (e) {
-      console.error('Failed to init shiki', e);
-      return { html: '' };
-    }
-  }
-
   try {
+    const highlighter = await getHighlighter();
     const loadedLangs = highlighter.getLoadedLanguages();
     const safeLang = targetLang && loadedLangs.includes(targetLang) ? targetLang : 'text';
 
