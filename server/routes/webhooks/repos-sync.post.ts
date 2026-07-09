@@ -15,8 +15,8 @@ async function verifyGitHubSignature(secret: string, payload: string, signature:
   const expectedSignature = `sha256=${hashHex}`;
 
   console.log("====== WEBHOOK VERIFICATION DEBUG ======");
-  console.log("Secret Length:", secret?.length);
-  console.log("Payload Length:", payload?.length);
+  console.log("Secret Length:", secret.length);
+  console.log("Payload Length:", payload.length);
   console.log("Received Signature:", signature);
   console.log("Calculated Signature:", expectedSignature);
   console.log("Exact Match:", signature === expectedSignature);
