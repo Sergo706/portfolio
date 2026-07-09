@@ -36,16 +36,16 @@ const path = computed(() => ['tree', 'blob', 'commits', 'commit'].includes(slug.
 definePageMeta({
   layout: false
 });
-
-useHead({
-  title: () => repoName.value ? `${repoName.value} — Repository` : 'Repository',
-});
-
 </script>
 
 <template>
   <NuxtLayout :name="['file', 'tree'].includes(viewType) ? 'tree' : (viewType === 'diff' ? 'diff' : 'default')">
     <div :class="['file', 'tree', 'diff'].includes(viewType) ? 'h-full flex flex-col w-full' : ''">
+      <FolioMeta
+        v-if="viewType === 'main' && projects"
+        :page="projects"
+        :is-writing="false"
+      />
       <ClientOnly>
         <RepoMainView
           v-if="viewType === 'main' && repoName && projects"

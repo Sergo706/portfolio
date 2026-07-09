@@ -71,7 +71,7 @@ export default defineEventHandler(async (event) => {
           await import('shiki/themes/github-dark.mjs')
         ],
         langs: await loadLangs(),
-        engine: createOnigurumaEngine(import('shiki/wasm'))
+        engine: createOnigurumaEngine(import('shiki/wasm').then(m => m.default))
       });
     } catch (e) {
       console.error('Failed to init shiki', e);
