@@ -13,15 +13,6 @@ async function verifyGitHubSignature(secret: string, payload: string, signature:
   const hashArray = Array.from(new Uint8Array(signatureBuffer));
   const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   const expectedSignature = `sha256=${hashHex}`;
-
-  console.log("====== WEBHOOK VERIFICATION DEBUG ======");
-  console.log("Secret Length:", secret.length);
-  console.log("Payload Length:", payload.length);
-  console.log("Received Signature:", signature);
-  console.log("Calculated Signature:", expectedSignature);
-  console.log("Exact Match:", signature === expectedSignature);
-  console.log("Payload snippet (first 100 chars):", payload.substring(0, 100).replace(/\n/g, '\\n'));
-  console.log("========================================");
  
   return signature === expectedSignature;
 }
@@ -42,11 +33,6 @@ export default defineEventHandler(async (event) => {
   const textBody = await readRawBody(event, 'utf-8');
 
   if (!signature || !textBody) {
-    console.log("Signature mismatch", {
-      received: signature,
-      secretLength: secret.length,
-      bodyLength: textBody.length,
-    });
     setResponseStatus(event, 400, "Bad request");
     return;
   }
@@ -54,6 +40,11 @@ export default defineEventHandler(async (event) => {
   const isValid = await verifyGitHubSignature(secret, textBody, signature);
 
   if (!isValid) {
+    console.log("Signature mismatch", {
+      received: signature,
+      secretLength: secret.length,
+      bodyLength: textBody.length,
+    });
     setResponseStatus(event, 401, "Unauthorized");
     return;
   }
@@ -79,6 +70,8 @@ export default defineEventHandler(async (event) => {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/vnd.github+json",
+      "User-Agent": "riavzon-portfolio-sync",
+      "X-GitHub-Api-Version": "2022-11-28"
     },
     body: {
       ref: "main", 
