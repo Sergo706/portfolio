@@ -2,7 +2,7 @@ import { createHighlighter, type Highlighter } from 'shiki';
 import { MiniCache } from '@riavzon/utils';
 
 let highlighter: Highlighter | null = null;
-const highlightCache = new MiniCache<string>(500);
+let highlightCache: MiniCache<string> | null = null;
 
 const SUPPORTED_LANGS = [
   'ts', 'js', 'mjs', 'mts', 'vue', 'diff', 'pascal', 'docker', 'py',
@@ -33,6 +33,8 @@ export default defineEventHandler(async (event) => {
     targetLang = resolveLang(filePath);
   }
   
+  highlightCache ??= new MiniCache<string>(500);
+
   const cacheKey = `${targetLang ?? 'text'}:${code}`;
   const cachedHtml = highlightCache.get(cacheKey);
   

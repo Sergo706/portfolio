@@ -36,7 +36,7 @@ function escapeHtml(text: string) {
 }
 
 
-const highlightMergeCache = new MiniCache<string>(5000);
+let highlightMergeCache: MiniCache<string> | null = null;
 
 export function mergeShikiWithDiff(
   shikiHtml: string, 
@@ -46,6 +46,9 @@ export function mergeShikiWithDiff(
   if (!diffWords || diffWords.length === 0) return shikiHtml;
 
   const cacheKey = `${shikiHtml}|${diffType}|${JSON.stringify(diffWords)}`;
+
+  highlightMergeCache ??= new MiniCache<string>(5000);
+
   const cached = highlightMergeCache.get(cacheKey);
   if (cached) return cached;
 
