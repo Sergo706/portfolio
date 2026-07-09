@@ -2,7 +2,7 @@
 import { useGitRepo } from '~/composables/repo/useGitRepo';
 import type { GitCommit, DiffFile } from '~~/shared/types/Git';
 import type { Ref } from 'vue';
-import { useIntersectionObserver } from '@vueuse/core';
+import { useIntersectionObserver, useMediaQuery } from '@vueuse/core';
 
 defineProps<{
   repoName: string;
@@ -21,7 +21,15 @@ const currentDiff = inject<Ref<{
 
 const currentCommit = inject<Ref<GitCommit | null>>('currentCommit');
 
+const isMobile = useMediaQuery('(max-width: 768px)');
 const viewMode = ref<'unified' | 'split'>('split');
+
+onMounted(() => {
+  if (isMobile.value) {
+    viewMode.value = 'unified';
+  }
+});
+
 const isWrapped = ref(true);
 
 const itemsPerPage = 6;

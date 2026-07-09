@@ -172,7 +172,7 @@ export function useDiffRowsHighlighted(
       if (newRow.type === 'removed' && newRow.oldLineNum && oldLinesHtml.value[newRow.oldLineNum - 1]) {
         const shikiHtml = oldLinesHtml.value[newRow.oldLineNum - 1]!;
         newRow.html = mergeShikiWithDiff(shikiHtml, newRow.words, 'removed');
-      } else if ((newRow.type === 'added' || newRow.type === 'normal') && newRow.newLineNum && newLinesHtml.value[newRow.newLineNum - 1]) {
+      } else if ((newRow.type === 'added' || newRow.type === 'context') && newRow.newLineNum && newLinesHtml.value[newRow.newLineNum - 1]) {
         const shikiHtml = newLinesHtml.value[newRow.newLineNum - 1]!;
         newRow.html = mergeShikiWithDiff(shikiHtml, newRow.words, 'added');
       }
