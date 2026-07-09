@@ -26,7 +26,7 @@ watch(branch, async (newBranch) => {
   }
 }, { immediate: true });
 
-const links = useTreeLinks(allFiles, repoName, branch);
+const links = useTreeLinks(allFiles, repoName, branch, route);
 
 const searchGroups = computed<CommandPaletteGroup[]>(() => [{
   id: 'files',
@@ -78,6 +78,7 @@ const searchGroups = computed<CommandPaletteGroup[]>(() => [{
         />
 
         <UNavigationMenu
+          :key="route.path"
           :collapsed="collapsed"
           :items="links"
           orientation="vertical"

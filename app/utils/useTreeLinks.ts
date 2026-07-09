@@ -1,5 +1,5 @@
 import type { NavigationMenuItem } from "@nuxt/ui";
-
+import type { RouteLocationNormalizedLoaded } from 'vue-router';
 const folderAliases: Record<string, string> = {
   '.github': 'github',
   '.vscode': 'vscode',
@@ -131,7 +131,26 @@ export const getIcon = (itemPath: string, isFile: boolean) => {
     : 'i-vscode-icons-default-file';
 };
 
-export function useTreeLinks(files: Ref<string[]>, repoName: Ref<string>, branch: Ref<string>) {
+function markOpenAncestors(items: NavigationMenuItem[], activePath: string): boolean {
+  let hasActiveDescendant = false;
+  for (const item of items) {
+    let childActive = false;
+    if (item.children?.length) {
+      childActive = markOpenAncestors(item.children, activePath);
+    }
+    const isActive = item.to === activePath;
+    if (isActive || childActive) {
+      item.defaultOpen = true;
+      item.active = isActive;
+      hasActiveDescendant = true;
+    }
+  }
+  return hasActiveDescendant;
+}
+
+
+
+export function useTreeLinks(files: Ref<string[]>, repoName: Ref<string>, branch: Ref<string>, route: RouteLocationNormalizedLoaded) {
   const links = computed(() => {
     const root: NavigationMenuItem[] = [];
 
@@ -184,6 +203,7 @@ export function useTreeLinks(files: Ref<string[]>, repoName: Ref<string>, branch
     };
     
     sortNodes(root);
+    markOpenAncestors(root, route.path);
     return root;
   });
 
