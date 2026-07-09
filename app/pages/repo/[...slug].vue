@@ -42,7 +42,7 @@ definePageMeta({
   <NuxtLayout :name="['file', 'tree'].includes(viewType) ? 'tree' : (viewType === 'diff' ? 'diff' : 'default')">
     <div :class="['file', 'tree', 'diff'].includes(viewType) ? 'h-full flex flex-col w-full' : ''">
       <FolioMeta
-        v-if="viewType === 'main' && projects"
+        v-if="projects"
         :page="projects"
         :is-writing="false"
       />

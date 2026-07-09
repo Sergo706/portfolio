@@ -31,11 +31,11 @@ export default defineEventHandler(async (event) => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const payload = JSON.parse(textBody);
   const pushPayload = payload as PushEvent;
-  const isPublic = pushPayload.repository.public;
+  const isPrivate = pushPayload.repository.private;
   const repoName = pushPayload.repository.name;
 
   
-  if (!isPublic) {
+  if (isPrivate) {
     return { status: "ignored", reason: "private repo" };
   }
 
