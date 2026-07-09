@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { useGitRepo } from '~/composables/repo/useGitRepo';
+import { fetchHighlightHtml } from '~/composables/repo/useSyntaxHighlighting';
 
 const props = defineProps<{
   content: string;
@@ -23,6 +24,22 @@ const isWrapped = defineModel<boolean>();
 const showRawMd = defineModel<boolean>('showRawMd');
 const isMarkdown = computed(() => lang.value === 'md');
 
+const highlightedRawMd = ref<string>('');
+const isHighlighting = ref(false);
+
+watch(showRawMd, async (val) => {
+  if (val && isMarkdown.value && !highlightedRawMd.value) {
+    isHighlighting.value = true;
+    try {
+      highlightedRawMd.value = await fetchHighlightHtml(props.content, props.filePath);
+    } catch (e) {
+      console.error('Failed to highlight raw markdown:', e);
+    } finally {
+      isHighlighting.value = false;
+    }
+  }
+});
+
 const code = computed(() => {
   if (!isMarkdown.value) return `\`\`\`${lang.value}\n${props.content}\n\`\`\``;
   
@@ -38,18 +55,24 @@ const code = computed(() => {
   <div
     class="file-viewer text-sm w-full"
     :class="{ 
-      'is-code': !isMarkdown, 
-      'markdown-body prose dark:prose-invert max-w-none': isMarkdown,
+      'is-code': !isMarkdown || (showRawMd && isMarkdown && highlightedRawMd), 
+      'markdown-body prose dark:prose-invert max-w-none': isMarkdown && (!showRawMd || (showRawMd && !highlightedRawMd)),
       'force-wrap': isWrapped,
-      'overflow-x-auto': !isWrapped && !isMarkdown
+      'overflow-x-auto': !isWrapped && (!isMarkdown || showRawMd)
     }"
   >
     <MDC 
       v-if="!showRawMd"
       :value="code"
     />
+    <div 
+      v-else-if="showRawMd && isMarkdown && highlightedRawMd" 
+      class="p-4 overflow-auto text-sm font-mono text-white/80"
+      :class="{ 'whitespace-pre-wrap break-words': isWrapped, 'whitespace-pre': !isWrapped }"
+      v-html="highlightedRawMd"
+    />
     <pre 
-      v-if="showRawMd && isMarkdown" 
+      v-else-if="showRawMd && isMarkdown" 
       class="p-4 overflow-auto text-sm font-mono text-white/80"
       :class="{ 'whitespace-pre-wrap break-words': isWrapped, 'whitespace-pre': !isWrapped }"
     >{{ code }}

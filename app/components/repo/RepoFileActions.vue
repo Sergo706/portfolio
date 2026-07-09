@@ -15,7 +15,7 @@ const showRawMd = defineModel<boolean>('showRawMd');
 const { copy, copied } = useClipboard();
 
 const mobileActionItems = computed(() => [
-  ...(!props.isMd ? [{
+  ...((!props.isMd || showRawMd.value) ? [{
     label: isWrapped.value ? 'Unwrap Code' : 'Wrap Code',
     icon: isWrapped.value ? 'i-lucide-align-left' : 'i-lucide-wrap-text',
     color: 'neutral' as const,
@@ -62,7 +62,7 @@ const mobileActionItems = computed(() => [
   <div class="flex items-center gap-2 shrink-0">
     <div class="hidden sm:flex items-center bg-white/5 rounded-lg overflow-hidden border border-white/10">
       <UTooltip
-        v-if="!isMd"
+        v-if="!isMd || showRawMd"
         :text="isWrapped ? 'Unwrap Code' : 'Wrap Code'"
       >
         <UButton
