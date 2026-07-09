@@ -112,3 +112,52 @@ const packedRefs = await fetchGitFile(repoUrl, 'packed-refs');
   // everything downloaded successfully, write the marker
   await pfs.writeFile(`${dir}/.cloned`, new Uint8Array());
 }
+
+
+
+export async function updateBareRepo(
+  pfs: LightningFSPromises,
+  repoUrl: string,
+  dir: string,
+): Promise<boolean> {
+  let downloadedSomething = false;
+
+  const head = await fetchGitFile(repoUrl, 'HEAD');
+  if (head) await pfs.writeFile(`${dir}/.git/HEAD`, head);
+
+  const packedRefs = await fetchGitFile(repoUrl, 'packed-refs');
+  if (packedRefs) await pfs.writeFile(`${dir}/.git/packed-refs`, packedRefs);
+
+  const infoRefs = await fetchGitFile(repoUrl, 'info/refs');
+  if (infoRefs) await pfs.writeFile(`${dir}/.git/info/refs`, infoRefs);
+
+
+  const packsRaw = await fetchGitFile(repoUrl, 'objects/info/packs');
+  if (!packsRaw) return false;
+  
+  await pfs.writeFile(`${dir}/.git/objects/info/packs`, packsRaw);
+
+
+  const packsText = new TextDecoder().decode(packsRaw);
+  for (const line of packsText.split('\n')) {
+    if (!line.startsWith('P ')) continue;
+    const packName = line.substring(2).trim();
+    if (!packName) continue;
+
+    const packExists = await pfs.stat(`${dir}/.git/objects/pack/${packName}`).catch(() => null);
+    
+    if (!packExists) {
+      const idxName = packName.replace('.pack', '.idx');
+      
+      const idxData = await fetchGitFile(repoUrl, `objects/pack/${idxName}`);
+      if (idxData) await pfs.writeFile(`${dir}/.git/objects/pack/${idxName}`, idxData);
+
+      const packData = await fetchGitFile(repoUrl, `objects/pack/${packName}`);
+      if (packData) await pfs.writeFile(`${dir}/.git/objects/pack/${packName}`, packData);
+      
+      downloadedSomething = true;
+    }
+  }
+
+  return downloadedSomething;
+}

@@ -1,6 +1,6 @@
 import git from 'isomorphic-git';
 import LightningFS from '@isomorphic-git/lightning-fs';
-import { syncBareRepo, wipeDir } from '~/utils/useFs';
+import { syncBareRepo, wipeDir, updateBareRepo } from '~/utils/useFs';
 import type { GitFile, GitCommit, FileDiffState, DiffFile } from '~~/shared/types/Git';
 import { MiniCache } from '@riavzon/utils';
 import type { WalkerEntry } from 'isomorphic-git';
@@ -57,6 +57,12 @@ function createGitRepo(repoName: string, initialBranch?: string) {
       if (!exists) {
           await wipeDir(pfs, dir);
           await syncBareRepo(pfs, repoUrl, dir);
+      } else {
+          // returning visitor
+          const hasUpdates = await updateBareRepo(pfs, repoUrl, dir);
+          if (hasUpdates) {
+             clearCache();
+          }
       }
 
       branches.value = await git.listBranches({ fs, dir });
