@@ -56,6 +56,15 @@ const options = computed(() => {
     onSelect: () => copy(props.file.path)
   });
 
+  if (!props.file.isBinary && props.file.type !== 'add' && props.file.type !== 'remove') {
+    items.push({
+      label: isExpanded.value ? 'Collapse non-diff lines' : 'Expand non-diff lines',
+      icon: isExpanded.value ? 'i-lucide-fold-vertical' : 'i-lucide-unfold-vertical',
+      class: 'sm:hidden',
+      onSelect: () => { isExpanded.value = !isExpanded.value; }
+    });
+  }
+
   return items.length > 0 ? [items] : [];
 });
 </script>
@@ -80,9 +89,11 @@ const options = computed(() => {
         class="hidden sm:inline-flex text-white/40 hover:text-white shrink-0"
         @click="copy(file.path)"
       />
-      <UTooltip :text="isExpanded ? 'Collapse non-diff lines' : 'Expand non-diff lines'">
+      <UTooltip 
+        v-if="!file.isBinary && file.type !== 'add' && file.type !== 'remove'"
+        :text="isExpanded ? 'Collapse non-diff lines' : 'Expand non-diff lines'"
+      >
         <UButton
-          v-if="!file.isBinary && file.type !== 'add' && file.type !== 'remove'"
           :icon="isExpanded ? 'i-lucide-fold-vertical' : 'i-lucide-unfold-vertical'"
           color="neutral"
           variant="ghost"
