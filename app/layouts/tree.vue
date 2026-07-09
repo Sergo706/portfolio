@@ -48,6 +48,7 @@ const searchGroups = computed<CommandPaletteGroup[]>(() => [{
     <UDashboardSidebar
       id="default"
       v-model:open="open"
+      :auto-close="false"
       collapsible
       resizable
       toggle-side="right"

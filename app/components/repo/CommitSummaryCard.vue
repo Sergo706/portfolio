@@ -53,7 +53,7 @@ const diffBlocks = computed<string[]>(() => {
   <UCard
     variant="outline"
     :ui="{
-      root: 'backdrop-blur-sm',
+      root: 'backdrop-blur-sm rounded-none sm:rounded-lg',
       body: 'p-0 sm:p-0 m-0',
     }"
   >
