@@ -83,12 +83,50 @@ export const useDownloadFile = (
   };
 };
 
-export const useIsImage = (filePath: Ref<string | undefined>, ) => {
+export const useIsImage = (filePath: Ref<string | undefined>) => {
   const isImage = computed(() => {
-  if (!filePath.value) return false;
-  const ext = filePath.value.split('.').pop()?.toLowerCase();
-  return ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'ico'].includes(ext ?? '');
-});
+    if (!filePath.value) return false;
+    const ext = filePath.value.split('.').pop()?.toLowerCase();
+    return ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'ico'].includes(ext ?? '');
+  });
 
-return isImage;
+  return isImage;
+};
+
+export const useImageBlobUrl = (
+  filePath: Ref<string | undefined>,
+  fileBlob: Ref<Uint8Array | null>
+) => {
+  const imageBlobUrl = ref<string | null>(null);
+
+  watchEffect((onCleanup) => {
+    if (!fileBlob.value || !filePath.value) {
+      if (imageBlobUrl.value) {
+        URL.revokeObjectURL(imageBlobUrl.value);
+        imageBlobUrl.value = null;
+      }
+      return;
+    }
+
+    const ext = filePath.value.split('.').pop()?.toLowerCase();
+    const mimeTypes: Record<string, string> = {
+      png: 'image/png',
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+      gif: 'image/gif',
+      webp: 'image/webp',
+      bmp: 'image/bmp',
+      ico: 'image/x-icon',
+    };
+    const mime = mimeTypes[ext ?? ''] ?? 'application/octet-stream';
+    const blob = new Blob([fileBlob.value as BlobPart], { type: mime });
+    const url = URL.createObjectURL(blob);
+    imageBlobUrl.value = url;
+
+    onCleanup(() => {
+      URL.revokeObjectURL(url);
+    });
+  });
+
+  return imageBlobUrl;
 };

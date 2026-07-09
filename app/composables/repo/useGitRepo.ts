@@ -382,20 +382,25 @@ async function switchBranch(branchName: string, skipRoute = false) {
     
     const isBinary = (buffer: Uint8Array | null) => buffer ? buffer.slice(0, 8000).some(byte => byte === 0) : false;
     const fileIsBinary = isBinary(oldBlob) || isBinary(newBlob);
-    if (fileIsBinary) {
-    return {
-      path: file.filepath,
-      type: file.type,
-      oldOid: file.oldOid,
-      newOid: file.newOid,
-      isBinary: true,
-      patch: 'Binary files differ',
-      hunks: [],
-      diffLines: [],
-      additions: 0,
-      deletions: 0
-    };
-  }
+    const isTooLarge = (oldBlob?.byteLength ?? 0) > 5e+6 || (newBlob?.byteLength ?? 0) > 5e+6;
+
+    if (fileIsBinary || isTooLarge) {
+      return {
+        path: file.filepath,
+        type: file.type,
+        oldOid: file.oldOid,
+        newOid: file.newOid,
+        isBinary: fileIsBinary,
+        isTooLarge,
+        oldSize: oldBlob?.byteLength,
+        newSize: newBlob?.byteLength,
+        patch: fileIsBinary ? 'Binary files differ' : 'Large files differ',
+        hunks: [],
+        diffLines: [],
+        additions: 0,
+        deletions: 0
+      };
+    }
 
     const oldText = oldBlob ? new TextDecoder('utf8').decode(oldBlob) : '';
     const newText = newBlob ? new TextDecoder('utf8').decode(newBlob) : '';
@@ -432,6 +437,8 @@ async function switchBranch(branchName: string, skipRoute = false) {
       oldOid: file.oldOid,
       newOid: file.newOid,
       isBinary: false,
+      oldSize: oldBlob?.byteLength,
+      newSize: newBlob?.byteLength,
       patch,
       hunks: structured.hunks,
       diffLines,

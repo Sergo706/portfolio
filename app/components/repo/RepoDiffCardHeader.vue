@@ -2,6 +2,8 @@
 import { computed } from 'vue';
 import { useClipboard } from '@vueuse/core';
 import type { DiffFile } from '~~/shared/types/Git';
+import { useFormatBytes } from '~/utils/useFileStats';
+import { useIsImage } from '~/composables/repo/useDownload';
 
 const props = defineProps<{
   file: DiffFile;
@@ -9,6 +11,8 @@ const props = defineProps<{
   parentHash: string;
   repoName: string;
 }>();
+
+const isImage = useIsImage(computed(() => props.file.path));
 
 const isCollapsed = defineModel<boolean>('isCollapsed', { required: true });
 const isExpanded = defineModel<boolean>('isExpanded', { default: false });
@@ -90,7 +94,7 @@ const options = computed(() => {
         @click="copy(file.path)"
       />
       <UTooltip 
-        v-if="!file.isBinary && file.type !== 'add' && file.type !== 'remove'"
+        v-if="!file.isBinary && !file.isTooLarge && file.type !== 'add' && file.type !== 'remove'"
         :text="isExpanded ? 'Collapse non-diff lines' : 'Expand non-diff lines'"
       >
         <UButton
@@ -113,24 +117,50 @@ const options = computed(() => {
       </UBadge>
     </div>
     <div class="flex items-center gap-1 shrink-0">
-      <UBadge
-        v-if="stats.add > 0"
-        color="success"
-        variant="subtle"
-        size="sm"
-        class="font-mono"
-      >
-        +{{ stats.add }}
-      </UBadge>
-      <UBadge
-        v-if="stats.del > 0"
-        color="error"
-        variant="subtle"
-        size="sm"
-        class="font-mono"
-      >
-        -{{ stats.del }}
-      </UBadge>
+      <template v-if="isImage">
+        <UBadge
+          v-if="file.oldSize !== undefined && file.type !== 'add'"
+          color="error"
+          variant="subtle"
+          size="sm"
+          class="font-mono"
+        >
+          {{ useFormatBytes(file.oldSize) }}
+        </UBadge>
+        <span
+          v-if="file.oldSize !== undefined && file.newSize !== undefined"
+          class="text-white/40 text-xs"
+        >→</span>
+        <UBadge
+          v-if="file.newSize !== undefined && file.type !== 'remove'"
+          color="success"
+          variant="subtle"
+          size="sm"
+          class="font-mono"
+        >
+          {{ useFormatBytes(file.newSize) }}
+        </UBadge>
+      </template>
+      <template v-else>
+        <UBadge
+          v-if="stats.add > 0"
+          color="success"
+          variant="subtle"
+          size="sm"
+          class="font-mono"
+        >
+          +{{ stats.add }}
+        </UBadge>
+        <UBadge
+          v-if="stats.del > 0"
+          color="error"
+          variant="subtle"
+          size="sm"
+          class="font-mono"
+        >
+          -{{ stats.del }}
+        </UBadge>
+      </template>
       
       <UDropdownMenu
         v-if="options.length > 0"

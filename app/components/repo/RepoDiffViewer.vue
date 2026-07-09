@@ -24,7 +24,7 @@ const currentCommit = inject<Ref<GitCommit | null>>('currentCommit');
 const viewMode = ref<'unified' | 'split'>('split');
 const isWrapped = ref(true);
 
-const itemsPerPage = 20;
+const itemsPerPage = 6;
 const page = ref(1);
 
 const visibleFiles = computed(() => {

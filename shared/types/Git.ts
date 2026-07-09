@@ -28,6 +28,9 @@ export interface DiffFile {
     oldOid?: string | undefined;
     newOid?: string | undefined;
     isBinary?: boolean;
+    isTooLarge?: boolean;
+    oldSize?: number;
+    newSize?: number;
     patch?: string;
     hunks?: Diff.StructuredPatchHunk[];
     diffLines?: Diff.ChangeObject<string>[];

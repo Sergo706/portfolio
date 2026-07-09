@@ -3,8 +3,11 @@ import { useGitRepo } from '~/composables/repo/useGitRepo';
 import type { DiffFile } from '~~/shared/types/Git';
 import { useDiffRows } from '~/composables/repo/useDiffRows';
 import { useDiffRowsHighlighted } from '~/composables/repo/useDiffRowsHighlighted';
+import RepoUnsupportedFile from './RepoUnsupportedFile.vue';
 import { useSyntaxHighlighting } from '~/composables/repo/useSyntaxHighlighting';
 import { useFullFileDiff } from '~/composables/repo/useFullFileDiff';
+import { useDownloadFile, useIsImage, useImageBlobUrl } from '~/composables/repo/useDownload';
+import { useFileContent } from '~/composables/repo/useFileContent';
 
 const props = defineProps<{
   file: DiffFile;
@@ -50,6 +53,27 @@ const { syntaxSplitRows, syntaxUnifiedRows } = useDiffRowsHighlighted(
   oldLinesHtml,
   newLinesHtml
 );
+
+const fileBlob = ref<Uint8Array | null>(null);
+const executeDownload = useDownloadFile(computed(() => props.file.path), fileBlob, ref(null));
+const downloadLargeFile = async () => {
+  fileBlob.value ??= await gitRepo.getFileBlob(props.file.path, props.commitHash);
+  executeDownload();
+};
+
+const isImage = useIsImage(computed(() => props.file.path));
+const oldFileContent = useFileContent(
+  computed(() => isImage.value && props.file.type !== 'add' ? props.file.path : undefined),
+  computed(() => props.parentHash)
+);
+const newFileContent = useFileContent(
+  computed(() => isImage.value && props.file.type !== 'remove' ? props.file.path : undefined),
+  computed(() => props.commitHash)
+);
+
+const oldImageUrl = useImageBlobUrl(computed(() => props.file.path), oldFileContent.fileBlob);
+const newImageUrl = useImageBlobUrl(computed(() => props.file.path), newFileContent.fileBlob);
+
 </script>
 
 <template>
@@ -86,6 +110,46 @@ const { syntaxSplitRows, syntaxUnifiedRows } = useDiffRowsHighlighted(
         />
       </div>
 
+      <div
+        v-else-if="isImage"
+        class="p-4 sm:p-8 flex flex-col lg:flex-row items-center justify-center bg-zinc-900/50 gap-4 sm:gap-8 overflow-x-auto min-h-[300px]"
+      >
+        <div
+          v-if="oldImageUrl"
+          class="flex flex-col items-center gap-4 relative"
+        >
+          <UBadge
+            color="error"
+            variant="subtle"
+            size="sm"
+            class="font-mono shadow-sm border border-red-500/20  absolute top-0 right-0"
+          >
+            Old
+          </UBadge>
+          <NuxtImg
+            :src="oldImageUrl"
+            class="max-h-[500px] max-w-full rounded border border-white/10 shadow-lg object-contain bg-zinc-950 p-2"
+          />
+        </div>
+        <div
+          v-if="newImageUrl"
+          class="flex flex-col items-center gap-4 relative"
+        >
+          <UBadge
+            color="success"
+            variant="subtle"
+            size="sm"
+            class="font-mono shadow-sm border border-green-500/20  absolute top-0 right-0"
+          >
+            New
+          </UBadge>
+          <NuxtImg
+            :src="newImageUrl"
+            class="max-h-[500px] max-w-full rounded border border-white/10 shadow-lg object-contain bg-zinc-950 p-2"
+          />
+        </div>
+      </div>
+
       <UCard
         v-else-if="file.isBinary"
         :ui="{ root: 'border border-white/10 bg-zinc-900/60 backdrop-blur-sm' }"
@@ -95,6 +159,20 @@ const { syntaxSplitRows, syntaxUnifiedRows } = useDiffRowsHighlighted(
           title="Binary file"
           description="Binary files differ."
           class="text-white/50"
+        />
+      </UCard>
+
+      <UCard
+        v-else-if="file.isTooLarge"
+        :ui="{ root: 'border border-white/10 bg-zinc-900/60 backdrop-blur-sm' }"
+      >
+        <RepoUnsupportedFile
+          :repo-name="repoName"
+          :file-path="file.path"
+          :branch="commitHash"
+          reason="This file's diff is too large to render locally."
+          :custom-github-url="`https://github.com/Sergo706/${repoName}/commit/${commitHash}`"
+          @download="downloadLargeFile"
         />
       </UCard>
       

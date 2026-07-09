@@ -36,8 +36,7 @@ export function useSyntaxHighlighting(
   const newLinesHtml = ref<string[]>([]);
 
   onMounted(async () => {
-    if (file.isBinary) return;
-
+    if (file.isBinary || file.isTooLarge) return;
 
     const [oldText, newText] = await Promise.all([
       file.type !== 'add' ? gitRepo.getFileContent(file.path, parentHash) : Promise.resolve(''),

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { getIcon } from '~/utils/useTreeLinks';
-import type { GitCommit, GitFile } from '~~/shared/types/Git';
 import { useTimeAgo } from '@vueuse/core';
 import AuthorLastCommit from '~/components/repo/AuthorLastCommit.vue';
 import type { useGitRepo } from '~/composables/repo/useGitRepo';
@@ -9,8 +8,9 @@ import BlobViewer from './BlobViewer.vue';
 import RepoFileActions from './RepoFileActions.vue';
 import RepoFileStats from './RepoFileStats.vue';
 import { useFileStats } from '~/utils/useFileStats.js';
-import { useDownloadFile, useIsImage } from '~/composables/repo/useDownload';
+import { useDownloadFile, useIsImage, useImageBlobUrl } from '~/composables/repo/useDownload';
 import { useGitAvatar } from '~/composables/repo/useGitAvatar.js';
+import { useFileContent } from '~/composables/repo/useFileContent';
 
 const props = defineProps<{
   repoName: string;
@@ -21,98 +21,30 @@ const props = defineProps<{
 
 const gitRepo = inject<ReturnType<typeof useGitRepo>>('gitRepo');
 if (!gitRepo) throw new Error('gitRepo not provided');
-const { getPathCommit, getFilesInFolder, getFileBlob, currentBranch, loading } = gitRepo;
+const { loading, currentBranch } = gitRepo;
 const isImage = useIsImage(computed(() => props.filePath));
 
-const pathLastCommit = ref<GitCommit | null>(null);
-const folderFiles = ref<GitFile[]>([]);
-const fileContent = ref<string | null>(null);
-const fileBlob = ref<Uint8Array | null>(null);
-const downloadFile = useDownloadFile(computed(() => props.filePath), fileBlob, fileContent);
+const {
+  pathLastCommit,
+  folderFiles,
+  fileContent,
+  fileBlob,
+  isBinaryFile,
+  fetching
+} = useFileContent(
+  computed(() => props.filePath),
+  computed(() => props.branch),
+  computed(() => props.isTree)
+);
 
-const imageBlobUrl = ref<string | null>(null);
-const isBinaryFile = ref(false);
-const fetching = ref(true);
+const downloadFile = useDownloadFile(computed(() => props.filePath), fileBlob, fileContent);
+const imageBlobUrl = useImageBlobUrl(computed(() => props.filePath), fileBlob);
+
 const fileStats = useFileStats(fileContent);
 const githubUrl = computed(() => {
   return `https://github.com/Sergo706/${props.repoName}/blob/${props.branch}/${String(props.filePath)}`;
 });
 const avatarUrl = useGitAvatar(pathLastCommit);
-
-
-
-watchEffect(() => {
-  if (!props.filePath || !props.branch) return;
-  if (loading.value) return;
-
-  const filePath = props.filePath;
-  const branch = props.branch;
-  const isTree = props.isTree;
-
-  fetching.value = true;
-
-  const fetchData = async () => {
-    try {
-      pathLastCommit.value = await getPathCommit(filePath, branch);
-      if (imageBlobUrl.value) {
-        URL.revokeObjectURL(imageBlobUrl.value);
-        imageBlobUrl.value = null;
-      }
-
-      if (isTree) {
-        folderFiles.value = await getFilesInFolder(filePath, branch);
-        fileContent.value = null;
-        fileBlob.value = null;
-        isBinaryFile.value = false;
-      } else if (isImage.value) {
-        fileContent.value = null;
-        isBinaryFile.value = false;
-        fileBlob.value = await getFileBlob(filePath, branch);
-        if (fileBlob.value) {
-           const ext = filePath.split('.').pop()?.toLowerCase();
-           const mimeTypes: Record<string, string> = {
-              png: 'image/png',
-              jpg: 'image/jpeg',
-              jpeg: 'image/jpeg',
-              gif: 'image/gif',
-              webp: 'image/webp',
-              bmp: 'image/bmp',
-              ico: 'image/x-icon',
-           };
-           const mime = mimeTypes[ext ?? ''] ?? 'application/octet-stream';
-           const blob = new Blob([fileBlob.value as BlobPart], { type: mime });
-           imageBlobUrl.value = URL.createObjectURL(blob);
-        }
-      } else {
-        const blob = await getFileBlob(filePath, branch);
-        fileBlob.value = blob;
-        if (blob) {
-          const isBinary = blob.slice(0, 8000).some(byte => byte === 0);
-          if (isBinary) {
-            isBinaryFile.value = true;
-            fileContent.value = null;
-          } else {
-            const text = new TextDecoder().decode(blob);
-            if (text.startsWith('version https://git-lfs.github.com/spec/v1')) {
-              isBinaryFile.value = true;
-              fileContent.value = null;
-            } else {
-              isBinaryFile.value = false;
-              fileContent.value = text;
-            }
-          }
-        } else {
-          isBinaryFile.value = false;
-          fileContent.value = null;
-        }
-      }
-    } finally {
-      fetching.value = false;
-    }
-  };
-
-  void fetchData();
-});
 
 const isLoading = computed(() => loading.value || fetching.value);
 const isCodeWrapped = ref(false);
@@ -250,25 +182,13 @@ const showRawMd = ref(false);
           class="max-w-full rounded border border-white/10 shadow-lg"
         />
       </div>
-      <div
+      <RepoUnsupportedFile
         v-else-if="isBinaryFile || (fileStats?.size ?? 0) > 5e+6"
-        class="p-16 flex flex-col items-center justify-center text-center gap-4 text-white/60"
-      >
-        <UIcon
-          name="i-lucide-file-archive"
-          class="size-16 opacity-50"
-        />
-        <p>This file is binary or to large and cannot be rendered this time.</p>
-
-        <UButton
-          variant="soft"
-          color="neutral"
-          icon="i-lucide-download"
-          @click="downloadFile"
-        >
-          Download File
-        </UButton>
-      </div>
+        :repo-name="repoName"
+        :file-path="filePath || ''"
+        :branch="branch"
+        @download="downloadFile"
+      />
       <BlobViewer
         v-else-if="fileContent !== null"
         v-model="isCodeWrapped"
