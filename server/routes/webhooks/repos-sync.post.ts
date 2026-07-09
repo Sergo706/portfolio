@@ -22,7 +22,7 @@ async function verifyGitHubSignature(secret: string, payload: string, signature:
   console.log("Exact Match:", signature === expectedSignature);
   console.log("Payload snippet (first 100 chars):", payload.substring(0, 100).replace(/\n/g, '\\n'));
   console.log("========================================");
-
+ 
   return signature === expectedSignature;
 }
 
