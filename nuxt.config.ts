@@ -129,6 +129,7 @@ export default defineNuxtConfig({
     }
   },
   runtimeConfig: {
+    reposDir: '',
     turnstile: {
       secretKey: '',
     },

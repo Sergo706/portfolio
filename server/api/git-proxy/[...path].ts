@@ -14,13 +14,13 @@ export default defineEventHandler(async (event) => {
   const bucket = event.context.cloudflare?.env?.R2_BUCKET as R2Bucket | undefined;
   
   if (!bucket) {
-    if (process.env.NODE_ENV === 'development') {
-      const baseDir = path.resolve(process.cwd(), 'repos');
-      const localPath = path.resolve(baseDir, filePath);
-      
-      if (!localPath.startsWith(baseDir)) {
-        throw createError({ statusCode: 403, message: 'Forbidden' });
-      }
+    const config = useRuntimeConfig();
+    const baseDir = config.reposDir ? path.resolve(String(config.reposDir)) : path.resolve(process.cwd(), 'repos');
+    const localPath = path.resolve(baseDir, filePath);
+    
+    if (!localPath.startsWith(baseDir)) {
+      throw createError({ statusCode: 403, message: 'Forbidden' });
+    }
 
       let resolvedPath = localPath;
       if (!fs.existsSync(resolvedPath)) {
@@ -40,15 +40,11 @@ export default defineEventHandler(async (event) => {
         }
       }
 
-      if (!fs.existsSync(resolvedPath) || fs.statSync(resolvedPath).isDirectory()) {
-        throw createError({ statusCode: 404, message: 'Not Found' });
-      }
-      
-      return sendStream(event, fs.createReadStream(resolvedPath));
+    if (!fs.existsSync(resolvedPath) || fs.statSync(resolvedPath).isDirectory()) {
+      throw createError({ statusCode: 404, message: 'Not Found' });
     }
-
-    console.log("The R2 binding is missing");
-    throw createError({ statusCode: 500, message: 'Server Error' });
+    
+    return sendStream(event, fs.createReadStream(resolvedPath));
   }
 
   const key = `repos/${filePath}`;
