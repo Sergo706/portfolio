@@ -51,8 +51,16 @@ const docTabs = computed(() => {
 </script>
 
 <template>
-  <UPage class="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
-    <div class="flex items-center gap-3">
+  <UPage class="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6 lg:px-8 relative">
+    <div class="absolute top-16 left-4 right-4 sm:left-6 sm:right-6 lg:left-8 lg:right-8 h-[480px] z-0 overflow-hidden pointer-events-none opacity-15 mix-blend-screen rounded-3xl">
+      <NuxtImg 
+        src="/assets/private-repo-cover.png" 
+        class="w-full h-full object-cover"
+        style="mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 15%, rgba(0,0,0,0) 100%); -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 45%, rgba(0,0,0,0) 100%);"
+      />
+    </div>
+
+    <div class="flex items-center gap-3 relative z-10">
       <UButton
         icon="i-lucide-arrow-left"
         variant="ghost"
@@ -70,6 +78,12 @@ const docTabs = computed(() => {
           :title="props.projectContent.name"
           :description="props.projectContent.description"
           :headline="repoName"
+          class="px-2 py-4 sm:px-10 lg:px-6 pt-6"
+          :ui="{
+            title: 'text-2xl sm:text-4xl font-bold',
+            description: 'text-sm sm:text-lg',
+            headline: 'text-xs sm:text-sm'
+          }"
         > 
           <template #links>
             <UButton
@@ -168,14 +182,27 @@ const docTabs = computed(() => {
         <UCard
           v-else
           :ui="{
-            root: 'border border-white/10 bg-zinc-900/60 backdrop-blur-sm',
+            root: 'border border-white/10 bg-zinc-900/60 backdrop-blur-sm overflow-hidden',
+            body: 'p-0 sm:p-0'
           }"
         >
-          <UEmpty
-            icon="i-lucide-file-question"
-            title="No README"
-            description="This repository does not contain a README file."
-          />
+          <div class="flex flex-col items-center justify-center relative group">
+            <NuxtImg
+              src="/assets/tree-with-eyes.png" 
+              class="w-full h-auto object-cover opacity-60 mix-blend-luminosity group-hover:mix-blend-normal group-hover:opacity-100 transition-all duration-700" 
+              alt="No README Cover"
+              loading="lazy"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent pointer-events-none" />
+            <div class="absolute bottom-0 left-0 w-full p-8 text-center">
+              <h3 class="text-xl sm:text-2xl font-bold text-white mb-2 font-mono drop-shadow-md">
+                No README.md
+              </h3>
+              <p class="text-sm sm:text-base text-zinc-300 drop-shadow-md">
+                Sorry, this repo doesn't have a README
+              </p>
+            </div>
+          </div>
         </UCard>
       </template>
     </UPageBody>
