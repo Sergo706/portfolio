@@ -64,6 +64,7 @@ export default defineNuxtConfig({
         'dotenv',
         'bash',
         "sh",
+        "http",
         'html',
         'css',
         "xml",
