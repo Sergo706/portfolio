@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
   
   if (!bucket) {
     const config = useRuntimeConfig();
-    const baseDir = config.reposDir ? path.resolve(String(config.reposDir)) : path.resolve(process.cwd(), 'repos');
+    const baseDir = config.reposDir ? path.resolve(config.reposDir as string) : path.resolve(process.cwd(), 'repos');
     const localPath = path.resolve(baseDir, filePath);
     
     if (!localPath.startsWith(baseDir)) {
