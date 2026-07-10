@@ -6,6 +6,7 @@ import ActionsSwitcher from './ActionsSwitcher.vue';
 import type { ProjectsCollectionItem } from '@nuxt/content';
 import AuthorLastCommit from './AuthorLastCommit.vue';
 import FileTree from './FileTree.vue';
+import { useMarkdownImageResolver } from '~/composables/repo/useMarkdownImageResolver.js';
 
 const props = defineProps<{
   repoName: string;
@@ -24,9 +25,11 @@ watch(() => props.branch, async (newBranch) => {
 }, { immediate: true });
 
 const activeDocTab = ref('0');
+const resolvedReadme = useMarkdownImageResolver(readme, repoName, currentBranch);
+
 const docTabs = computed(() => {
   const tabs = [];
-  if (readme.value) {
+  if (resolvedReadme.value) {
     tabs.push({ label: 'README.md', icon: 'i-lucide-book-open' });
   }
   if (license.value) {
@@ -146,7 +149,7 @@ const docTabs = computed(() => {
 
         
         <UCard
-          v-if="readme || license"
+          v-if="resolvedReadme || license"
           :ui="{
             root: 'border border-white/10 bg-zinc-900/60 backdrop-blur-sm',
             body: 'p-0',
@@ -164,8 +167,8 @@ const docTabs = computed(() => {
 
           <div class="prose prose-invert prose-sm max-w-none p-4">
             <MDC
-              v-if="activeDocTab === '0' && readme"
-              :value="readme"
+              v-if="activeDocTab === '0' && resolvedReadme"
+              :value="resolvedReadme"
             />
             <pre
               v-else-if="activeDocTab === '1' && license"

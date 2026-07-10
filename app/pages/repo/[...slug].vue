@@ -18,6 +18,17 @@ const { data: projects } = await useAsyncData(`project-${repoName.value}`, async
     .first();
 });
 
+if (!projects.value) {
+  throw createError({
+      statusCode: 404,
+      message: 'Repository not found',
+      data: {
+        errorDescription: 'There is nothing to see here...',
+        image: '/assets/error-tree.png'
+      }
+  });
+}
+
 const viewType = computed(() => {
   if (slug.value.length === 1) return 'main';
   if (slug.value[1] === 'tree') {
@@ -40,15 +51,17 @@ definePageMeta({
 
 <template>
   <NuxtLayout :name="['file', 'tree'].includes(viewType) ? 'tree' : (viewType === 'diff' ? 'diff' : 'default')">
-    <div :class="['file', 'tree', 'diff'].includes(viewType) ? 'h-full flex flex-col w-full' : ''">
+    <div
+      v-if="projects"
+      :class="['file', 'tree', 'diff'].includes(viewType) ? 'h-full flex flex-col w-full' : ''"
+    >
       <FolioMeta
-        v-if="projects"
         :page="projects"
         :is-writing="false"
       />
       <ClientOnly>
         <RepoMainView
-          v-if="viewType === 'main' && repoName && projects"
+          v-if="viewType === 'main' && repoName"
           :project-content="projects"
           :repo-name="repoName"
           :branch="branch"

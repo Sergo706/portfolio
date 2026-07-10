@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { useGitRepo } from '~/composables/repo/useGitRepo';
+import { useMarkdownImageResolver } from '~/composables/repo/useMarkdownImageResolver';
 import { fetchHighlightHtml } from '~/composables/repo/useSyntaxHighlighting';
 
 const props = defineProps<{
@@ -24,6 +25,12 @@ const isWrapped = defineModel<boolean>();
 const showRawMd = defineModel<boolean>('showRawMd');
 const isMarkdown = computed(() => lang.value === 'md');
 
+const resolvedMarkdown = useMarkdownImageResolver(
+  computed(() => props.content),
+  gitRepo?.repoName ?? '',
+  gitRepo?.currentBranch ?? ''
+);
+
 const highlightedRawMd = ref<string>('');
 const isHighlighting = ref(false);
 
@@ -31,7 +38,7 @@ watch(showRawMd, async (val) => {
   if (val && isMarkdown.value && !highlightedRawMd.value) {
     isHighlighting.value = true;
     try {
-      highlightedRawMd.value = await fetchHighlightHtml(props.content, props.filePath);
+      highlightedRawMd.value = await fetchHighlightHtml(resolvedMarkdown.value, props.filePath);
     } catch (e) {
       console.error('Failed to highlight raw markdown:', e);
     } finally {
@@ -42,13 +49,7 @@ watch(showRawMd, async (val) => {
 
 const code = computed(() => {
   if (!isMarkdown.value) return `\`\`\`${lang.value}\n${props.content}\n\`\`\``;
-  
-  if (!gitRepo) return props.content;
-  const baseUrl = `https://cdn.jsdelivr.net/gh/Sergo706/${gitRepo.repoName}@${gitRepo.currentBranch.value}/`;
-  
-  return props.content
-    .replace(/!\[(.*?)\]\((?!http)(.*?)\)/g, `![$1](${baseUrl}$2)`)
-    .replace(/<img([^>]+)src=["'](?!http)(.*?)["']/g, `<img$1src="${baseUrl}$2"`);
+  return resolvedMarkdown.value;
 });
 </script>
 <template>
