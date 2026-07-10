@@ -2,29 +2,29 @@
 
 This repository contains the source code for my personal portfolio website.
 
-The application uses Nuxt, Nuxt UI, Tailwind CSS, Nuxt Content to manage content, and a custom read-only Git repository viewer.
+The application uses [Nuxt](https://nuxt.com), [Nuxt UI](https://ui.nuxt.com), [Tailwind CSS](https://tailwindcss.com), [Nuxt Content](https://content.nuxt.com) to manage content, and a custom read-only Git repository viewer.
 
 You can check it out [here](https://riavzon.com).
 
 The site is statically generated; however, the Git viewer is purely client-side.
 
-Beyond standard portfolio features, this repository serves as a serverless, read-only Git infrastructure. It includes a custom-built Git repository viewer that parses bare repositories natively in the browser. Instead of exposing repository contents through an API, the application downloads Git packfiles via the Git Dumb HTTP protocol and reconstructs the repository client-side using isomorphic-git. Trees, blobs, commits, history, and diffs are derived directly from Git objects in the browser.
+Beyond standard portfolio features, this repository serves as a serverless, read-only Git infrastructure. It includes a custom-built Git repository viewer that parses bare repositories natively in the browser. Instead of exposing repository contents through an API, the application downloads Git packfiles via the Git Dumb HTTP protocol and reconstructs the repository client-side using [isomorphic-git](https://isomorphic-git.org/). Trees, blobs, commits, history, and diffs are derived directly from Git objects in the browser.
 
-> The Git repository viewer uses a custom Nitro API proxy (`/api/git-proxy`) to fetch static Git objects (`.pack`, `info/refs`) from a private Cloudflare R2 bucket via the Dumb HTTP protocol, rendering them entirely client-side.
+> The Git repository viewer uses a custom [Nitro](https://nitro.build/) API proxy (`/api/git-proxy`) to fetch static Git objects (`.pack`, `info/refs`) from a private [Cloudflare R2](https://developers.cloudflare.com/r2/) bucket via the Dumb HTTP protocol, rendering them entirely client-side.
 
-> Cloudflare is optional. You can point the proxy to a local path where you store all your repositories and serve them directly from there.
+> [Cloudflare](https://www.cloudflare.com/) is optional. You can point the proxy to a local path where you store all your repositories and serve them directly from there.
 
-> The Git features will not work properly on massive repositories (QEMU, the Linux kernel, etc.).
+> The Git features will not work properly on massive repositories (QEMU, the Linux kernel, etc.). For this scale, consider looking into [cgit](https://git.zx2c4.com/cgit/about/) or similar.
 
 ## Features
 
 ### Git
 
-* Clones and reads bare repositories directly in the browser using isomorphic-git.
+* Clones and reads bare repositories directly in the browser using [isomorphic-git](https://isomorphic-git.org/).
 
-* Calculates character-level diffs on the client using the `diff` library, supports both split and unified views, and weaves them into server-rendered Shiki HTML tokens.
+* Calculates character-level diffs on the client using the [`diff`](https://github.com/kpdecker/jsdiff) library, supports both split and unified views, and weaves them into server-rendered [Shiki](https://shiki.style/) HTML tokens.
 
-* Virtual File System: Uses lightning-fs backed by IndexedDB to cache repository objects, reducing bandwidth usage and load times for repeat visits.
+* Virtual File System: Uses [lightning-fs](https://github.com/isomorphic-git/lightning-fs) backed by [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) to cache repository objects, reducing bandwidth usage and load times for repeat visits.
 
 * Has file views with code highlighting, tree views, commit trees, and filtering functionality.
 
@@ -32,28 +32,28 @@ Beyond standard portfolio features, this repository serves as a serverless, read
 
 ### Portfolio
 
-* Write and manage blog posts and content with Nuxt Content.
-* Integrates with Resend for contact forms.
-* Integrates with Cal.com to schedule meetings.
-* Integrates with Cloudflare Turnstile for the contact form.
+* Write and manage blog posts and content with [Nuxt Content](https://content.nuxt.com).
+* Integrates with [Resend](https://resend.com) for contact forms.
+* Integrates with [Cal.com](https://cal.com) to schedule meetings.
+* Integrates with [Cloudflare Turnstile](https://www.cloudflare.com/products/turnstile/) for the contact form.
 
 ## Usage
 
 ### Using Cloudflare
 
-If you decide to use this repository for your own portfolio, you will need to modify `scripts/getPublicRepos.mjs` to point to your account, create a GitHub App with configured webhooks pointing to `https://your-domain.com/webhooks/repos-sync`, configure an appropriate secret, and provide it as the `NUXT_WEBHOOK_SECRET` environment variable. Then simply install the GitHub App on all your repositories.
+If you decide to use this repository for your own portfolio, you will need to modify `scripts/getPublicRepos.mjs` to point to your account, create a [GitHub App](https://docs.github.com/en/apps/creating-github-apps) with configured webhooks pointing to `https://your-domain.com/webhooks/repos-sync`, configure an appropriate secret, and provide it as the `NUXT_WEBHOOK_SECRET` environment variable. Then simply install the GitHub App on all your repositories.
 
 Your webhook needs to fire on **Create**, **Push**, **Repository**, **Delete**, and **Release** events.
 
-Once you have a GitHub App, create a GitHub Personal Access Token with **Read** access to code and metadata, and **Read & Write** access to Actions, allowing the application to trigger the `sync-repos.yml` workflow.
+Once you have a GitHub App, create a [GitHub Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) with **Read** access to code and metadata, and **Read & Write** access to Actions, allowing the application to trigger the `sync-repos.yml` workflow.
 
-At this point, every time you make a change to one of your repositories, GitHub will fire a webhook to `/webhooks/repos-sync`. This handler validates that the request is coming from GitHub and triggers the workflow at:
+At this point, every time you make a change to one of your repositories, [GitHub](https://github.com/) will fire a webhook to `/webhooks/repos-sync`. This handler validates that the request is coming from GitHub and triggers the workflow at:
 
 `https://api.github.com/repos/${owner}/${portfolioRepo}/actions/workflows/sync-repos.yml/dispatches`
 
 where `${portfolioRepo}` is `portfolio` and `${owner}` is `pushPayload.repository.owner.login`, for public repositories.
 
-The workflow uploads the bare repositories generated by `scripts/getPublicRepos.mjs` to the configured Cloudflare R2 bucket using the credentials configured in your repository secrets:
+The workflow uploads the bare repositories generated by `scripts/getPublicRepos.mjs` to the configured [Cloudflare R2](https://developers.cloudflare.com/r2/) bucket using the credentials configured in your repository secrets:
 
 ```bash
 CLOUDFLARE_R2_ACCOUNT_ID: secrets.CLOUDFLARE_R2_ACCOUNT_ID
@@ -89,7 +89,7 @@ To modify the site's content, edit the files in the `content/` directory before 
 ### Environment Variables
 
 * `NUXT_RESEND_API_KEY` - Used for receiving emails from leads. Emails will be sent using this key to your configured email address (Required). Change the receiving email in `server/api/contact.post.ts`.
-* `NUXT_TURNSTILE_SECRET_KEY` - Secret key for the Cloudflare Turnstile CAPTCHA used by the contact form (Required).
+* `NUXT_TURNSTILE_SECRET_KEY` - Secret key for the [Cloudflare Turnstile](https://www.cloudflare.com/products/turnstile/) CAPTCHA used by the contact form (Required).
 * `NUXT_PUBLIC_TURNSTILE_SITE_KEY` - Public site key for the Cloudflare Turnstile CAPTCHA (Required).
 * `NUXT_WEBHOOK_SECRET` - Secret used to verify that webhook requests originate from your GitHub App (Required when using Cloudflare).
 * `NUXT_GITHUB_TOKEN` - GitHub Personal Access Token used to trigger the synchronization workflow (Required when using Cloudflare).
@@ -97,7 +97,7 @@ To modify the site's content, edit the files in the `content/` directory before 
 
 ## Local Development
 
-You will need Node.js and npm installed to run the project locally.
+You will need [Node.js](https://nodejs.org/) and [npm](https://www.npmjs.com/) installed to run the project locally.
 
 Clone the repository:
 
@@ -141,7 +141,7 @@ The application will be available at `http://localhost:3000`.
 
 ## Deployment
 
-This application is built for the Cloudflare Pages environment. Deployment is fully automated via GitHub Actions (`.github/workflows/deploy.yml`).
+This application is built for the [Cloudflare Pages](https://pages.cloudflare.com/) environment. Deployment is fully automated via [GitHub Actions](https://github.com/features/actions) (`.github/workflows/deploy.yml`).
 
 To build the application manually for production:
 
