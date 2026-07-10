@@ -37,6 +37,7 @@ provide('currentCommit', currentCommit);
 const changedFiles = ref<DiffFile[]>([]);
 let gitCache = {};
 watch([branch, () => gitRepo.loading.value], async ([newHash, isLoading]) => {
+  if (!import.meta.client) return;
   if (isLoading || !newHash) return;
 
   if (viewType.value !== 'commit' && newHash !== currentBranch.value) {
@@ -60,18 +61,29 @@ watch([branch, () => gitRepo.loading.value], async ([newHash, isLoading]) => {
 
         if (logs[1]) {
           const diffResult = await gitRepo.getCommitDiff(logs[1].oid, logs[0].oid);
-          currentDiff.value = diffResult;
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-          if (diffResult && 'files' in diffResult) {
-            changedFiles.value = diffResult.files;
+          if (!diffResult.ok) {
+             console.error('[diff.vue] getCommitDiff failed:', diffResult.reason);
+             showError({
+                statusCode: 500,
+                message: 'Failed to load diff',
+                data: { errorDescription: diffResult.reason, image: '/assets/error-tree.png' }
+             });
+             return;
           }
+          currentDiff.value = diffResult.data;
+          changedFiles.value = diffResult.data.files;
         } else {
           const fileList = await gitRepo.git.listFiles({ fs: gitRepo.fs, dir: gitRepo.dir, ref: logs[0].oid });
           changedFiles.value = fileList.map((f: string) => ({ path: f, type: 'add' as const }));
         }
       }
     } catch (e) {
-      console.warn('Failed to load sidebar diff tree:', e);
+      console.error('[diff.vue] Failed to load sidebar diff tree:', e);
+      showError({
+         statusCode: 500,
+         message: 'Failed to load commit',
+         data: { errorDescription: e instanceof Error ? e.message : String(e), image: '/assets/error-tree.png' }
+      });
     }
   }
 }, { immediate: true });
@@ -111,30 +123,57 @@ const searchGroups = computed<CommandPaletteGroup[]>(() => [{
       class="bg-elevated/25"
     >   
       <template #header>
-        Files
+        <USkeleton
+          v-if="gitRepo.loading.value"
+          class="h-6 w-16"
+        />
+        <template v-else>
+          Files
+        </template>
       </template>
 
       <template #default="{ collapsed }">
-        <BranchSelector
-          v-if="!collapsed"
-          :current-ref="currentBranch || 'main'"
-          :tags="tags"
-          :branches="branches"
-          class="!w-full"
-          @change-ref="switchBranch"
-        />
-        <UDashboardSearchButton
-          :collapsed="collapsed"
-          :label="'Search files...'"
-        />
+        <template v-if="gitRepo.loading.value">
+          <div
+            v-if="!collapsed"
+            class="w-full flex items-center justify-between gap-2 px-1 mb-2 mt-1"
+          >
+            <USkeleton class="h-5 w-32" />
+            <USkeleton class="h-4 w-4" />
+          </div>
+          <div class="px-2 mb-2">
+            <USkeleton class="h-8 w-full" />
+          </div>
+          <div class="flex flex-col gap-1 mt-4 px-2">
+            <USkeleton
+              v-for="i in 12"
+              :key="i"
+              class="h-7 w-full"
+            />
+          </div>
+        </template>
+        <template v-else>
+          <BranchSelector
+            v-if="!collapsed"
+            :current-ref="currentBranch || 'main'"
+            :tags="tags"
+            :branches="branches"
+            class="!w-full"
+            @change-ref="switchBranch"
+          />
+          <UDashboardSearchButton
+            :collapsed="collapsed"
+            :label="'Search files...'"
+          />
 
-        <UNavigationMenu
-          :collapsed="collapsed"
-          :items="links"
-          orientation="vertical"
-          :tooltip="true"
-          :popover="true"
-        />
+          <UNavigationMenu
+            :collapsed="collapsed"
+            :items="links"
+            orientation="vertical"
+            :tooltip="true"
+            :popover="true"
+          />
+        </template>
       </template>
     </UDashboardSidebar>
 

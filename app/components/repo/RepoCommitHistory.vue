@@ -50,7 +50,17 @@ const itemsPerPage = 10;
 const loadCommits = async () => {
   fetching.value = true;
   try {
-    allCommits.value = await gitRepo.getAllCommits(selectedBranch.value, props.filePath);
+    const res = await gitRepo.getAllCommits(selectedBranch.value, props.filePath);
+    if (res.ok) {
+      allCommits.value = res.data;
+    } else {
+      console.error('[RepoCommitHistory] getAllCommits failed:', res.reason);
+      showError({
+         statusCode: 404,
+         message: 'Commits not found',
+         data: { errorDescription: res.reason, image: '/assets/error-tree.png' }
+      });
+    }
   } finally {
     fetching.value = false;
   }
@@ -194,16 +204,7 @@ const handlePageChange = (page: number) => {
     />
 
     <UPageBody>
-      <div
-        v-if="fetching || gitRepo.loading.value"
-        class="space-y-4 px-4 sm:px-6 lg:px-8"
-      >
-        <USkeleton
-          v-for="i in 5"
-          :key="i"
-          class="h-24 w-full"
-        />
-      </div>
+      <RepoSkeletonsCommitHistory v-if="fetching || gitRepo.loading.value" />
       
       <div
         v-else-if="filteredCommits.length === 0"

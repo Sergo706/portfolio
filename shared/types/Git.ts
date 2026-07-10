@@ -37,3 +37,11 @@ export interface DiffFile {
     additions?: number;
     deletions?: number;
 }
+export interface GitRepoError {
+  statusCode: number;
+  message: string;
+  data: {
+    errorDescription?: string;
+    image?: string;
+  };
+}

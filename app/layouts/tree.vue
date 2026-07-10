@@ -60,31 +60,58 @@ const searchGroups = computed<CommandPaletteGroup[]>(() => [{
       class="bg-elevated/25"
     >   
       <template #header>
-        Files
+        <USkeleton
+          v-if="gitRepo.loading.value"
+          class="h-6 w-16"
+        />
+        <template v-else>
+          Files
+        </template>
       </template>
 
       <template #default="{ collapsed }">
-        <BranchSelector
-          v-if="!collapsed"
-          :current-ref="currentBranch || 'main'"
-          :tags="tags"
-          :branches="branches"
-          class="!w-full"
-          @change-ref="switchBranch"
-        />
-        <UDashboardSearchButton
-          :collapsed="collapsed"
-          :label="'Search files...'"
-        />
+        <template v-if="gitRepo.loading.value">
+          <div
+            v-if="!collapsed"
+            class="w-full flex items-center justify-between gap-2 px-1 mb-2 mt-1"
+          >
+            <USkeleton class="h-5 w-32" />
+            <USkeleton class="h-4 w-4" />
+          </div>
+          <div class="px-2 mb-2">
+            <USkeleton class="h-8 w-full" />
+          </div>
+          <div class="flex flex-col gap-1 mt-4 px-2">
+            <USkeleton
+              v-for="i in 12"
+              :key="i"
+              class="h-7 w-full"
+            />
+          </div>
+        </template>
+        <template v-else>
+          <BranchSelector
+            v-if="!collapsed"
+            :current-ref="currentBranch || 'main'"
+            :tags="tags"
+            :branches="branches"
+            class="!w-full"
+            @change-ref="switchBranch"
+          />
+          <UDashboardSearchButton
+            :collapsed="collapsed"
+            :label="'Search files...'"
+          />
 
-        <UNavigationMenu
-          :key="route.path"
-          :collapsed="collapsed"
-          :items="links"
-          orientation="vertical"
-          :tooltip="true"
-          :popover="true"
-        />
+          <UNavigationMenu
+            :key="route.path"
+            :collapsed="collapsed"
+            :items="links"
+            orientation="vertical"
+            :tooltip="true"
+            :popover="true"
+          />
+        </template>
       </template>
     </UDashboardSidebar>
     

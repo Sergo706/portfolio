@@ -54,7 +54,14 @@ const showRawMd = ref(false);
 </script>
 
 <template>
-  <div class="flex flex-col gap-4">
+  <RepoSkeletonsFileViewer
+    v-if="isLoading"
+    :file-path="filePath"
+  />
+  <div
+    v-else
+    class="flex flex-col gap-4"
+  >
     <RepoBreadcrumbs
       :repo-name="repoName"
       :branch="branch"
@@ -62,20 +69,8 @@ const showRawMd = ref(false);
       :is-tree="isTree"
     />
 
-    <div
-      v-if="isLoading"
-      class="flex items-center gap-3 border border-zinc-800 rounded-lg p-4"
-    >
-      <USkeleton class="size-8 rounded-full shrink-0" />
-      <div class="flex-1 space-y-2">
-        <USkeleton class="h-3.5 w-48" />
-        <USkeleton class="h-3 w-32" />
-      </div>
-      <USkeleton class="h-3 w-20 shrink-0" />
-    </div>
-
     <AuthorLastCommit
-      v-else-if="pathLastCommit"
+      v-if="pathLastCommit"
       :last-commit="pathLastCommit"
       :avatar-url="avatarUrl"
       :repo-name="repoName"
@@ -92,41 +87,6 @@ const showRawMd = ref(false);
     </div>
 
     <UCard
-      v-if="isLoading"
-      :ui="{ root: 'border border-white/10 bg-zinc-900/60 backdrop-blur-sm shadow-xl' }"
-    >
-      <template #header>
-        <div class="flex items-center gap-2">
-          <USkeleton class="size-4 rounded" />
-          <USkeleton class="h-4 w-28" />
-        </div>
-      </template>
-      <div class="divide-y divide-white/5">
-        <div
-          v-for="i in 6"
-          :key="i"
-          class="flex items-center justify-between gap-4 px-4 py-2.5"
-        >
-          <div class="flex items-center gap-3">
-            <USkeleton class="size-4 rounded" />
-            <USkeleton
-              class="h-3.5"
-              :style="{ width: `${60 + (i * 20) % 80}px` }"
-            />
-          </div>
-          <div class="flex items-center gap-4">
-            <USkeleton
-              class="h-3"
-              :style="{ width: `${100 + (i * 30) % 120}px` }"
-            />
-            <USkeleton class="h-3 w-16" />
-          </div>
-        </div>
-      </div>
-    </UCard>
-
-    <UCard
-      v-else
       :ui="{ root: 'border border-white/10 bg-zinc-900/60 backdrop-blur-sm shadow-xl', body: !isTree ? 'p-0 sm:p-0' : '' }"
     >
       <template #header>

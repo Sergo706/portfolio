@@ -57,7 +57,10 @@ const { syntaxSplitRows, syntaxUnifiedRows } = useDiffRowsHighlighted(
 const fileBlob = ref<Uint8Array | null>(null);
 const executeDownload = useDownloadFile(computed(() => props.file.path), fileBlob, ref(null));
 const downloadLargeFile = async () => {
-  fileBlob.value ??= await gitRepo.getFileBlob(props.file.path, props.commitHash);
+  if (!fileBlob.value) {
+    const res = await gitRepo.getFileBlob(props.file.path, props.commitHash);
+    fileBlob.value = res.ok ? res.data : null;
+  }
   executeDownload();
 };
 

@@ -9,6 +9,10 @@ import { Toaster } from 'vue-sonner';
   >
     <Body>
       <LayoutScrollToTop />
+      <NuxtRouteAnnouncer />
+      <NuxtLoadingIndicator 
+        :color="'primary'"
+      />
       <NuxtLayout>
         <UApp>
           <NuxtPage />

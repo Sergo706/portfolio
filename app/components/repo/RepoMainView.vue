@@ -24,6 +24,16 @@ watch(() => props.branch, async (newBranch) => {
   }
 }, { immediate: true });
 
+watch(error, (err) => {
+  if (err) {
+    showError({
+      statusCode: err.statusCode || 500,
+      message: err.message || 'Error',
+      data: err.data
+    });
+  }
+}, { immediate: true });
+
 const activeDocTab = ref('0');
 const resolvedReadme = useMarkdownImageResolver(readme, repoName, currentBranch);
 
@@ -53,29 +63,7 @@ const docTabs = computed(() => {
       />
     </div>
     <UPageBody>
-      <UAlert
-        v-if="error"
-        color="error"
-        icon="i-lucide-alert-circle"
-        title="Failed to load repository"
-        :description="error ?? 'Server Error try again later'"
-      />
-
-      <div
-        v-if="loading"
-        class="space-y-4"
-      >
-        <USkeleton class="h-10 w-64" />
-        <USkeleton class="h-6 w-full" />
-        <div class="space-y-2">
-          <USkeleton
-            v-for="i in 8"
-            :key="i"
-            class="h-8 w-full"
-          />
-        </div>
-        <USkeleton class="h-48 w-full" />
-      </div>
+      <RepoSkeletonsMainView v-if="loading" />
 
       <template v-if="!loading && !error">
         <UPageHeader

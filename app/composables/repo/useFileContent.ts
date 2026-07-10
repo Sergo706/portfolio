@@ -37,20 +37,56 @@ export function useFileContent(
 
     const fetchData = async () => {
       try {
-        pathLastCommit.value = await getPathCommit(path, refBranch);
+        const commitRes = await getPathCommit(path, refBranch);
+        if (commitRes.ok) {
+          pathLastCommit.value = commitRes.data;
+        } else {
+          pathLastCommit.value = null;
+        }
 
         if (tree) {
-          folderFiles.value = await getFilesInFolder(path, refBranch);
+          const filesRes = await getFilesInFolder(path, refBranch);
+          if (!filesRes.ok) {
+             console.error('[useFileContent] getFilesInFolder failed:', filesRes.reason);
+             showError({
+                statusCode: 404,
+                message: 'Folder not found',
+                data: { errorDescription: filesRes.reason, image: '/assets/error-tree.png' }
+             });
+             return;
+          }
+          folderFiles.value = filesRes.data;
           fileContent.value = null;
           fileBlob.value = null;
           isBinaryFile.value = false;
         } else if (isImage.value) {
           fileContent.value = null;
           isBinaryFile.value = false;
-          fileBlob.value = await getFileBlob(path, refBranch);
+          const blobRes = await getFileBlob(path, refBranch);
+          if (!blobRes.ok) {
+             console.error('[useFileContent] getFileBlob (image) failed:', blobRes.reason);
+             showError({
+                statusCode: 404,
+                message: 'Image not found',
+                data: { errorDescription: blobRes.reason, image: '/assets/error-tree.png' }
+             });
+             return;
+          }
+          fileBlob.value = blobRes.data;
         } else {
-          const blob = await getFileBlob(path, refBranch);
+          const blobRes = await getFileBlob(path, refBranch);
+          if (!blobRes.ok) {
+             console.error('[useFileContent] getFileBlob failed:', blobRes.reason);
+             showError({
+                statusCode: 404,
+                message: 'File not found',
+                data: { errorDescription: blobRes.reason, image: '/assets/error-tree.png' }
+             });
+             return;
+          }
+          const blob = blobRes.data;
           fileBlob.value = blob;
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
           if (blob) {
             const isBinary = blob.slice(0, 8000).some(byte => byte === 0);
             if (isBinary) {

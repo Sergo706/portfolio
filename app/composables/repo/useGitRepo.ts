@@ -1,12 +1,14 @@
 import git from 'isomorphic-git';
 import LightningFS from '@isomorphic-git/lightning-fs';
 import { syncBareRepo, wipeDir, updateBareRepo } from '~/utils/useFs';
-import type { GitFile, GitCommit, FileDiffState, DiffFile } from '~~/shared/types/Git';
+import type { GitFile, GitCommit, FileDiffState, DiffFile, GitRepoError } from '~~/shared/types/Git';
 import { MiniCache } from '@riavzon/utils';
 import type { WalkerEntry } from 'isomorphic-git';
 import * as Diff from 'diff';
+import type { Results } from '@riavzon/utils';
 
 let gitRepoCache: MiniCache<ReturnType<typeof createGitRepo>> | null = null;
+
 
 export function useGitRepo(repoName: string, initialBranch?: string) {
   gitRepoCache ??= new MiniCache<ReturnType<typeof createGitRepo>>(10);
@@ -31,7 +33,7 @@ function createGitRepo(repoName: string, initialBranch?: string) {
   const readme = ref<string | null>(null);
   const license = ref<string | null>(null);
   const loading = ref(true);
-  const error = ref<string | null>(null);
+  const error = ref<GitRepoError | null>(null);
   const currentBranch = ref<string>(initialBranch ?? '');
   const branches = ref<string[]>([]);
   const tags = ref<string[]>();
@@ -56,11 +58,25 @@ function createGitRepo(repoName: string, initialBranch?: string) {
       const exists = await pfs.stat(`${dir}/.cloned`).catch(() => null);
       if (!exists) {
           await wipeDir(pfs, dir);
-          await syncBareRepo(pfs, repoUrl, dir);
+          const syncResult = await syncBareRepo(pfs, repoUrl, dir);
+          if (!syncResult.ok) {
+              console.error(`[useGitRepo] syncBareRepo failed:`, syncResult.reason);
+              error.value = {
+                statusCode: 404,
+                message: 'Repository not found',
+                data: {
+                  errorDescription: 'We could not clone or locate this repository.',
+                  image: '/assets/error-tree.png'
+                }
+              };
+              return;
+          }
       } else {
           // returning visitor
-          const hasUpdates = await updateBareRepo(pfs, repoUrl, dir);
-          if (hasUpdates) {
+          const updateResult = await updateBareRepo(pfs, repoUrl, dir);
+          if (!updateResult.ok) {
+             console.warn(`[useGitRepo] updateBareRepo failed (offline?):`, updateResult.reason);
+          } else if (updateResult.data) {
              clearCache();
           }
       }
@@ -70,8 +86,25 @@ function createGitRepo(repoName: string, initialBranch?: string) {
       if (!currentBranch.value) {
         currentBranch.value = branches.value.includes('main') ? 'main' : branches.value[0] ?? ''; 
       }
-
+      
       tags.value = await git.listTags({ fs, dir });
+
+      if (currentBranch.value) {
+        try {
+          await git.log({ fs, dir, ref: currentBranch.value, depth: 1, cache: gitCache });
+        } catch {
+          console.error(`[useGitRepo] Ref not found: ${currentBranch.value}`);
+          error.value = {
+             statusCode: 404,
+             message: 'Ref not found',
+             data: {
+               errorDescription: `The branch, tag, or commit '${currentBranch.value}' does not exist in this repository.`,
+               image: '/assets/error-tree.png'
+             }
+          };
+          return;
+        }
+      }
 
       const fileList = await git.listFiles({ fs, dir, ref: currentBranch.value, cache: gitCache });
       allFiles.value = fileList;
@@ -163,8 +196,15 @@ function createGitRepo(repoName: string, initialBranch?: string) {
       }
 
     } catch (e) {
-      error.value = e instanceof Error ? e.message : 'Failed to load repository';
-      console.error('useGitRepo error:', e);
+      console.error('[useGitRepo] init error:', e);
+      error.value = {
+        statusCode: 500,
+        message: 'Internal Error',
+        data: {
+          errorDescription: e instanceof Error ? e.message : 'Failed to load repository',
+          image: '/assets/error-tree.png'
+        }
+      };
     } finally {
       loading.value = false;
     }
@@ -202,30 +242,43 @@ async function switchBranch(branchName: string, skipRoute = false) {
     await init();
   }
 
-  async function getPathCommit(filepath: string, branch?: string): Promise<GitCommit | null> {
+  async function getPathCommit(filepath: string, branch?: string): Promise<Results<GitCommit>> {
     try {
       const ref = branch ?? currentBranch.value;
       const logs = await git.log({ fs, dir, filepath, depth: 1, ref, cache: gitCache });
       const commit = logs[0];
       if (commit) {
         return {
-          hash: commit.oid,
-          message: commit.commit.message.trim(),
-          author: commit.commit.author.name,
-          email: commit.commit.author.email,
-          date: new Date(commit.commit.author.timestamp * 1000),
-          parentHash: commit.commit.parent[0],
+          ok: true,
+          date: new Date().toISOString(),
+          data: {
+            hash: commit.oid,
+            message: commit.commit.message.trim(),
+            author: commit.commit.author.name,
+            email: commit.commit.author.email,
+            date: new Date(commit.commit.author.timestamp * 1000),
+            parentHash: commit.commit.parent[0],
+          }
         };
       }
+      return { 
+        ok: false, 
+        reason: `Commit not found for ${filepath}`, 
+        date: new Date().toISOString() 
+      };
     } catch (e) {
-      console.warn(`Failed to fetch commit for ${filepath}`, e);
+      return { 
+        ok: false,
+        reason: `Failed to fetch commit for ${filepath}: ${e instanceof Error ? e.message : String(e)}`,
+        date: new Date().toISOString() 
+      };
     }
-    return null;
   }
 
-  async function getFilesInFolder(folderPath: string | undefined, branch?: string): Promise<GitFile[]> {
+  async function getFilesInFolder(folderPath: string | undefined, branch?: string): Promise<Results<GitFile[]>> {
+   try {
     const ref = branch ?? currentBranch.value;
-    const fileList = await git.listFiles({ fs, dir, ref, cache: gitCache }).catch(() => [] as string[]);
+    const fileList = await git.listFiles({ fs, dir, ref, cache: gitCache });
     
     const prefix = folderPath ? folderPath + '/' : '';
     const fileMap = new Map<string, GitFile>();
@@ -260,6 +313,14 @@ async function switchBranch(branchName: string, skipRoute = false) {
       return a.type === 'dir' ? -1 : 1;
     });
 
+    if (folderPath && items.length === 0) {
+      return { 
+        ok: false, 
+        reason: `Folder '${folderPath}' not found`, 
+        date: new Date().toISOString() 
+      };
+    }
+
     await Promise.all(items.map(async (item) => {
       try {
         const logs = await git.log({ fs, dir, filepath: item.path, depth: 1, ref, cache: gitCache });
@@ -279,52 +340,84 @@ async function switchBranch(branchName: string, skipRoute = false) {
       }
     }));
 
-    return items;
+    return { 
+      ok: true, 
+      data: items, 
+      date: new Date().toISOString() 
+    };
+   } catch(e) {
+     return { 
+       ok: false, 
+       reason: `Failed to list files: ${e instanceof Error ? e.message : String(e)}`, 
+       date: new Date().toISOString() 
+     };
+   }
   }
   
-  async function getFileContent(filepath: string, branch?: string): Promise<string | null> {
+  async function getFileContent(filepath: string, branch?: string): Promise<Results<string>> {
     try {
       const ref = branch ?? currentBranch.value;
       const commitOid = await git.resolveRef({ fs, dir, ref });
       const { blob } = await git.readBlob({ fs, dir, oid: commitOid, filepath, cache: gitCache });
-      return new TextDecoder().decode(blob);
+      return { 
+        ok: true, 
+        data: new TextDecoder().decode(blob), 
+        date: new Date().toISOString() 
+      };
     } catch (e) {
-      console.warn(`Failed to fetch file content for ${filepath}`, e);
-      return null;
+      return { 
+        ok: false, 
+        reason: `Failed to fetch file content for ${filepath}: ${e instanceof Error ? e.message : String(e)}`, 
+        date: new Date().toISOString() 
+      };
     }
   }
 
-  async function getFileBlob(filepath: string, branch?: string): Promise<Uint8Array | null> {
+  async function getFileBlob(filepath: string, branch?: string): Promise<Results<Uint8Array>> {
     try {
       const ref = branch ?? currentBranch.value;
       const commitOid = await git.resolveRef({ fs, dir, ref });
       const { blob } = await git.readBlob({ fs, dir, oid: commitOid, filepath, cache: gitCache });
-      return blob;
+      return { 
+        ok: true, 
+        data: blob, 
+        date: new Date().toISOString() 
+      };
     } catch (e) {
-      console.warn(`Failed to fetch file blob for ${filepath}`, e);
-      return null;
+      return { 
+        ok: false, 
+        reason: `Failed to fetch file blob for ${filepath}: ${e instanceof Error ? e.message : String(e)}`, 
+        date: new Date().toISOString() 
+      };
     }
   }
 
-  async function getAllCommits(branch?: string, filepath?: string): Promise<GitCommit[]> {
+  async function getAllCommits(branch?: string, filepath?: string): Promise<Results<GitCommit[]>> {
     try {
       const ref = branch ?? currentBranch.value;
       const logs = await git.log({ fs, dir, ref, filepath: filepath ?? undefined, cache: gitCache });
-      return logs.map(commit => ({
-        hash: commit.oid,
-        message: commit.commit.message.trim(),
-        author: commit.commit.author.name,
-        email: commit.commit.author.email,
-        date: new Date(commit.commit.author.timestamp * 1000),
-        parentHash: commit.commit.parent[0],
-      }));
+      return { 
+        ok: true, 
+        data: logs.map(commit => ({
+          hash: commit.oid,
+          message: commit.commit.message.trim(),
+          author: commit.commit.author.name,
+          email: commit.commit.author.email,
+          date: new Date(commit.commit.author.timestamp * 1000),
+          parentHash: commit.commit.parent[0],
+        })), 
+        date: new Date().toISOString() 
+      };
     } catch (e) {
-      console.warn(`Failed to fetch all commits for ${String(branch)}`, e);
-      return [];
+      return { 
+        ok: false, 
+        reason: `Failed to fetch commits: ${e instanceof Error ? e.message : String(e)}`, 
+        date: new Date().toISOString() 
+      };
     }
   }
 
-  async function getCommitDiff(oldCommitHash: string, newCommitHash: string) {
+  async function getCommitDiff(oldCommitHash: string, newCommitHash: string): Promise<Results<{files: DiffFile[], stats: {filesChanged: number, insertions: number, deletions: number}}>> {
     try {
      const fileStates = await git.walk({
         fs,
@@ -458,23 +551,23 @@ async function switchBranch(branchName: string, skipRoute = false) {
     }
   });
 
-  return {
-    files: validDiffs as unknown as DiffFile[],
-    stats: {
-      filesChanged: validDiffs.length,
-      insertions: totalInsertions,
-      deletions: totalDeletions
+  return { 
+    ok: true, 
+    date: new Date().toISOString(), 
+    data: {
+      files: validDiffs as unknown as DiffFile[],
+      stats: {
+        filesChanged: validDiffs.length,
+        insertions: totalInsertions,
+        deletions: totalDeletions
+      }
     }
   };
    } catch (e) {
-      console.warn(`Failed to fetch diff between ${oldCommitHash} and ${newCommitHash}`, e);
-      return {
-        files: [],
-        stats: {
-          filesChanged: 0,
-          insertions: 0,
-          deletions: 0
-        }
+      return { 
+        ok: false, 
+        reason: `Failed to fetch diff: ${e instanceof Error ? e.message : String(e)}`, 
+        date: new Date().toISOString() 
       };
     }
   }

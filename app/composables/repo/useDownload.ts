@@ -8,16 +8,18 @@ export function useDownloadZip(options: {
   repoName: string;
 }) {
   const { fs, dir, repoName } = options;
-
+  // eslint-disable-next-line prefer-const
+  let gitCache = {};
+  
   const download = async () => {
     const currentRef = options.ref.value;
     try {
-      const fileList = await git.listFiles({ fs, dir, ref: currentRef });
+      const fileList = await git.listFiles({ fs, dir, ref: currentRef, cache: gitCache });
       const commitOid = await git.resolveRef({ fs, dir, ref: currentRef });
       const zip = new jszip();
 
       for (const file of fileList) {
-        const { blob } = await git.readBlob({ fs, dir, oid: commitOid, filepath: file });
+        const { blob } = await git.readBlob({ fs, dir, oid: commitOid, filepath: file, cache: gitCache });
         zip.file(file, blob);
       }
       

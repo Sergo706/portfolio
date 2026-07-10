@@ -38,10 +38,19 @@ export function useSyntaxHighlighting(
   onMounted(async () => {
     if (file.isBinary || file.isTooLarge) return;
 
-    const [oldText, newText] = await Promise.all([
-      file.type !== 'add' ? gitRepo.getFileContent(file.path, parentHash) : Promise.resolve(''),
-      file.type !== 'remove' ? gitRepo.getFileContent(file.path, commitHash) : Promise.resolve('')
+    const [oldRes, newRes] = await Promise.all([
+
+      file.type !== 'add' ? 
+       gitRepo.getFileContent(file.path, parentHash) :
+       Promise.resolve({ ok: true, data: '' } as const),
+
+      file.type !== 'remove' ?
+       gitRepo.getFileContent(file.path, commitHash) :
+       Promise.resolve({ ok: true, data: '' } as const)
     ]);
+    
+    const oldText = oldRes.ok ? oldRes.data : '';
+    const newText = newRes.ok ? newRes.data : '';
 
     const [oldHtml, newHtml] = await Promise.all([
       fetchHighlightLines(oldText, file.path),
