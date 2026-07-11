@@ -24,6 +24,7 @@ const projectSchema = z.object({
   link: z.string().url(),
   npm: z.string().url(),
   release: z.string().nonempty(),
+  owner: z.string().optional(),
   date: z.string().nonempty(),
   featured: z.boolean().optional(),
 })

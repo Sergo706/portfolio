@@ -15,6 +15,7 @@ import { useFileContent } from '~/composables/repo/useFileContent';
 const props = defineProps<{
   repoName: string;
   branch: string;
+  owner?: string;
   filePath?: string;
   isTree?: boolean;
 }>();
@@ -30,7 +31,8 @@ const {
   fileContent,
   fileBlob,
   isBinaryFile,
-  fetching
+  fetching,
+  isResolvingCommits
 } = useFileContent(
   computed(() => props.filePath),
   computed(() => props.branch),
@@ -77,6 +79,7 @@ const showRawMd = ref(false);
       class="text-white bg-transparent border border-zinc-800 shadow-sm p-4 rounded-lg"
       :time-ago="useTimeAgo(pathLastCommit.date).value"
       :show-commit-count="{ show: true, count: null, currentBranch: branch || 'main', historyPath: filePath }"
+      :is-resolving-commits="isResolvingCommits"
     />
 
     <div
@@ -131,6 +134,7 @@ const showRawMd = ref(false);
         :files="folderFiles"
         :repo-name="repoName"
         :current-branch="currentBranch"
+        :is-resolving-commits="isResolvingCommits"
       />
       <div
         v-else-if="isImage && imageBlobUrl"
@@ -155,6 +159,7 @@ const showRawMd = ref(false);
         v-model:show-raw-md="showRawMd"
         :content="fileContent"
         :file-path="filePath || ''"
+        :owner="owner"
       />
     </UCard>
   </div>

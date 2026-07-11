@@ -6,6 +6,7 @@ import { fetchHighlightHtml } from '~/composables/repo/useSyntaxHighlighting';
 const props = defineProps<{
   content: string;
   filePath: string;
+  owner?: string;
 }>();
 
 const gitRepo = inject<ReturnType<typeof useGitRepo>>('gitRepo');
@@ -28,7 +29,8 @@ const isMarkdown = computed(() => lang.value === 'md');
 const resolvedMarkdown = useMarkdownImageResolver(
   computed(() => props.content),
   gitRepo?.repoName ?? '',
-  gitRepo?.currentBranch ?? ''
+  gitRepo?.currentBranch ?? '',
+  props.owner
 );
 
 const highlightedRawMd = ref<string>('');
@@ -95,17 +97,34 @@ const code = computed(() => {
   white-space: pre-wrap !important;
 }
 
-.file-viewer.markdown-body :deep(p:first-of-type img),
-.file-viewer.markdown-body :deep(a img),
-.file-viewer.markdown-body :deep(img[src*="badge"]),
-.file-viewer.markdown-body :deep(img[src*="shield"]) {
-  display: inline-block;
-  height: 28px;
-  width: auto;
-  margin: 0 4px 0 0;
+.file-viewer.markdown-body :deep(p:has(img[src*="badge" i])),
+.file-viewer.markdown-body :deep(p:has(img[src*="shield" i])) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
 }
 
-.file-viewer.markdown-body :deep(img) {
+.file-viewer.markdown-body :deep(p:first-of-type img:not([src*="banner" i]):not([alt*="banner" i])),
+.file-viewer.markdown-body :deep(a img:not([src*="banner" i]):not([alt*="banner" i])),
+.file-viewer.markdown-body :deep(img[src*="badge" i]),
+.file-viewer.markdown-body :deep(img[src*="shield" i]) {
+  display: inline-block;
+  height: 20px;
+  width: auto;
+  margin: 0;
+}
+
+.file-viewer.markdown-body :deep(img[src*="banner" i]),
+.file-viewer.markdown-body :deep(img[alt*="banner" i]) {
+  width: 100% !important;
+  height: auto !important;
+  max-width: 100% !important;
+  display: block !important;
+  margin: 1.5rem 0 !important;
+}
+
+.file-viewer.markdown-body :deep(img:not([src*="banner" i]):not([alt*="banner" i])) {
   max-width: 100%;
 }
 

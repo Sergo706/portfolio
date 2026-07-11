@@ -50,7 +50,7 @@ const itemsPerPage = 10;
 const loadCommits = async () => {
   fetching.value = true;
   try {
-    const res = await gitRepo.getAllCommits(selectedBranch.value, props.filePath);
+    const res = await gitRepo.getAllCommits(selectedBranch.value, props.filePath, false);
     if (res.ok) {
       allCommits.value = res.data;
     } else {
@@ -204,6 +204,21 @@ const handlePageChange = (page: number) => {
     />
 
     <UPageBody>
+      <div class="flex items-center mb-6">
+        <USkeleton
+          v-if="fetching || gitRepo.loading.value"
+          class="h-6 w-28 bg-white/5 rounded-full"
+        />
+        <UBadge
+          v-else
+          color="neutral"
+          icon="i-lucide-git-commit-horizontal"
+          size="lg"
+          :label="`${allCommits.length} Commits`"
+          class="font-mono ring-1 ring-white/10 bg-white/5 text-white/70"
+        />
+      </div>
+      
       <RepoSkeletonsCommitHistory v-if="fetching || gitRepo.loading.value" />
       
       <div

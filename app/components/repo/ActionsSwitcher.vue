@@ -1,20 +1,24 @@
 <script lang="ts" setup>
-import type { FsClient } from 'isomorphic-git';
-import { useDownloadZip } from '~/composables/repo/useDownload';
 import BranchSelector from './BranchSelector.vue';
+import type { Results } from '@riavzon/utils';
+import { useDownloadZip } from '~/composables/repo/useDownload';
 
 const props = defineProps<{
     currentRef: string
     tags?: string[]
     branches: string[]
-    fs: FsClient,
-    dir: string,
+    downloadZip: (branch?: string) => Promise<Results<Uint8Array>>
     repoName: string
 }>();
 defineEmits<(e: 'changeRef', refName: string) => void>();
 
 const currentRefs = ref(props.currentRef);
-const download = useDownloadZip({fs: props.fs, dir: props.dir, ref: currentRefs, repoName: props.repoName });
+
+const { download: handleDownload, isDownloading } = useDownloadZip({
+  downloadZip: props.downloadZip,
+  repoName: props.repoName,
+  ref: currentRefs
+});
 
 </script>
 
@@ -57,7 +61,8 @@ const download = useDownloadZip({fs: props.fs, dir: props.dir, ref: currentRefs,
         loading-auto
         icon="i-lucide-file-archive"
         class="w-full md:w-auto md:ml-auto"
-        @click="async () => await download()"
+        :loading="isDownloading"
+        @click="handleDownload"
       >
         Download ZIP
       </UButton>

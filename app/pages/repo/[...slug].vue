@@ -86,6 +86,7 @@ definePageMeta({
           :branch="branch"
           :file-path="path"
           :is-tree="viewType === 'tree'"
+          :owner="projects.owner"
         />
 
         <template #fallback>

@@ -19,6 +19,7 @@ export function useFileContent(
   const fileBlob = ref<Uint8Array | null>(null);
   const isBinaryFile = ref(false);
   const fetching = ref(false);
+  const isResolvingCommits = ref(true);
 
   watchEffect(() => {
     if (!filePath.value || !branch.value) {
@@ -33,29 +34,53 @@ export function useFileContent(
     const refBranch = branch.value;
     const tree = isTree.value;
 
-    fetching.value = true;
+    if (tree) {
+      fetching.value = false;
+      isResolvingCommits.value = true;
+      pathLastCommit.value = null;
+      folderFiles.value = [];
+    } else {
+      fetching.value = true;
+    }
 
     const fetchData = async () => {
       try {
         const commitRes = await getPathCommit(path, refBranch);
+        if (filePath.value !== path) return;
+        
+        let folderLastCommitHash: string | undefined = undefined;
         if (commitRes.ok) {
           pathLastCommit.value = commitRes.data;
+          folderLastCommitHash = commitRes.data.hash;
         } else {
           pathLastCommit.value = null;
         }
 
         if (tree) {
-          const filesRes = await getFilesInFolder(path, refBranch);
-          if (!filesRes.ok) {
-             console.error('[useFileContent] getFilesInFolder failed:', filesRes.reason);
-             showError({
-                statusCode: 404,
-                message: 'Folder not found',
-                data: { errorDescription: filesRes.reason, image: '/assets/error-tree.png' }
-             });
-             return;
-          }
-          folderFiles.value = filesRes.data;
+          const onProgress = (items: GitFile[], isDone: boolean) => {
+            if (filePath.value !== path) return;
+            folderFiles.value = items;
+            if (isDone) {
+              isResolvingCommits.value = false;
+            }
+          };
+          
+          const fetchFilesPromise = getFilesInFolder(path, refBranch, onProgress, folderLastCommitHash).then(filesRes => {
+            if (filePath.value !== path) return;
+            if (!filesRes.ok) {
+               console.error('[useFileContent] getFilesInFolder failed:', filesRes.reason);
+               showError({
+                  statusCode: 404,
+                  message: 'Folder not found',
+                  data: { errorDescription: filesRes.reason, image: '/assets/error-tree.png' }
+               });
+               return;
+            }
+            folderFiles.value = filesRes.data;
+          });
+
+          await fetchFilesPromise;
+          
           fileContent.value = null;
           fileBlob.value = null;
           isBinaryFile.value = false;
@@ -63,6 +88,7 @@ export function useFileContent(
           fileContent.value = null;
           isBinaryFile.value = false;
           const blobRes = await getFileBlob(path, refBranch);
+          if (filePath.value !== path) return;
           if (!blobRes.ok) {
              console.error('[useFileContent] getFileBlob (image) failed:', blobRes.reason);
              showError({
@@ -75,6 +101,7 @@ export function useFileContent(
           fileBlob.value = blobRes.data;
         } else {
           const blobRes = await getFileBlob(path, refBranch);
+          if (filePath.value !== path) return;
           if (!blobRes.ok) {
              console.error('[useFileContent] getFileBlob failed:', blobRes.reason);
              showError({
@@ -121,6 +148,7 @@ export function useFileContent(
     fileContent,
     fileBlob,
     isBinaryFile,
-    fetching
+    fetching,
+    isResolvingCommits
   };
 }

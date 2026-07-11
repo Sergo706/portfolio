@@ -14,7 +14,7 @@ const props = defineProps<{
   branch?: string;
 }>();
 
-const { files, fs, dir, repoName, lastCommit, commitCount, readme, license, loading, error, switchBranch, currentBranch, branches, tags } = useGitRepo(props.repoName);
+const { files, repoName, lastCommit, commitCount, isResolvingCommits, readme, license, loading, error, switchBranch, currentBranch, branches, tags, downloadZip } = useGitRepo(props.repoName, props.branch);
 const timeAgo  = useTimeAgo(() => lastCommit.value?.date ?? new Date());
 const avatarUrl = useGitAvatar(lastCommit);
 
@@ -35,7 +35,7 @@ watch(error, (err) => {
 }, { immediate: true });
 
 const activeDocTab = ref('0');
-const resolvedReadme = useMarkdownImageResolver(readme, repoName, currentBranch);
+const resolvedReadme = useMarkdownImageResolver(readme, repoName, currentBranch, props.projectContent.owner);
 
 const docTabs = computed(() => {
   const tabs = [];
@@ -120,9 +120,8 @@ const docTabs = computed(() => {
           :current-ref="currentBranch"
           :branches="branches"
           :tags="tags"
-          :fs="fs"
-          :dir="dir"
           :repo-name="repoName"
+          :download-zip="downloadZip"
           @change-ref="switchBranch"
         />
       
@@ -139,6 +138,7 @@ const docTabs = computed(() => {
               :repo-name="repoName"
               :time-ago="timeAgo"
               :show-commit-count="{ show: true, count: commitCount, currentBranch }"
+              :is-resolving-commits="isResolvingCommits"
             />
           </template>
 
@@ -146,6 +146,7 @@ const docTabs = computed(() => {
             :files="files"
             :repo-name="repoName"
             :current-branch="currentBranch"
+            :is-resolving-commits="isResolvingCommits"
           />
         </UCard>
 
@@ -208,3 +209,36 @@ const docTabs = computed(() => {
     </UPageBody>
   </UPage>
 </template>
+
+<style scoped>
+.prose :deep(p:has(img[src*="badge" i])),
+.prose :deep(p:has(img[src*="shield" i])) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.prose :deep(p:first-of-type img:not([src*="banner" i]):not([alt*="banner" i])),
+.prose :deep(a img:not([src*="banner" i]):not([alt*="banner" i])),
+.prose :deep(img[src*="badge" i]),
+.prose :deep(img[src*="shield" i]) {
+  display: inline-block;
+  height: 20px;
+  width: auto;
+  margin: 0;
+}
+
+.prose :deep(img[src*="banner" i]),
+.prose :deep(img[alt*="banner" i]) {
+  width: 100% !important;
+  height: auto !important;
+  max-width: 100% !important;
+  display: block !important;
+  margin: 1.5rem 0 !important;
+}
+
+.prose :deep(img:not([src*="banner" i]):not([alt*="banner" i])) {
+  max-width: 100%;
+}
+</style>

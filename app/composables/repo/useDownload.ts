@@ -1,48 +1,41 @@
-import git, { type FsClient } from 'isomorphic-git';
-import jszip from 'jszip';
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+import type { Results } from '@riavzon/utils';
 
 export function useDownloadZip(options: {
-  fs: FsClient;
-  dir: string;
-  ref: Ref<string>;
+  downloadZip: (branch?: string) => Promise<Results<Uint8Array>>;
   repoName: string;
+  ref: Ref<string>;
 }) {
-  const { fs, dir, repoName } = options;
-  // eslint-disable-next-line prefer-const
-  let gitCache = {};
-  
+  const isDownloading = ref(false);
+
   const download = async () => {
-    const currentRef = options.ref.value;
+    if (isDownloading.value) return;
+    isDownloading.value = true;
     try {
-      const fileList = await git.listFiles({ fs, dir, ref: currentRef, cache: gitCache });
-      const commitOid = await git.resolveRef({ fs, dir, ref: currentRef });
-      const zip = new jszip();
-
-      for (const file of fileList) {
-        const { blob } = await git.readBlob({ fs, dir, oid: commitOid, filepath: file, cache: gitCache });
-        zip.file(file, blob);
+      const result = await options.downloadZip(options.ref.value);
+      if (result.ok) {
+        if (!result.data) throw new Error('Download failed: No data');
+        const url = URL.createObjectURL(new Blob([result.data as BlobPart]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${options.repoName}-${options.ref.value}.zip`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => { URL.revokeObjectURL(url); }, 1000);
+        toast.success(`Downloaded ${options.repoName}`);
+      } else {
+        throw new Error(result.reason || 'Download failed');
       }
-      
-      const zipBlob = await zip.generateAsync({ type: 'blob' });
-      const url = URL.createObjectURL(zipBlob);
-      
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${repoName}-${currentRef}.zip`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    
-    setTimeout(() => { URL.revokeObjectURL(url); }, 1000);
-    toast.success(`Downloading ${repoName}...`);
-  } catch (error) {
-    console.error('Failed to download ZIP:', error);
-    toast.error(`Error downloading ${repoName}`);
-  }
-};
+    } catch (e) {
+      console.error('Download ZIP error:', e);
+      toast.error(`Error downloading ${options.repoName}`);
+    } finally {
+      isDownloading.value = false;
+    }
+  };
 
-
-return download;
+  return { download, isDownloading };
 }
 
 

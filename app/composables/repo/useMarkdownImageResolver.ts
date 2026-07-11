@@ -1,7 +1,8 @@
 export function useMarkdownImageResolver(
   content: Ref<string | null> | string | null,
   repoName: Ref<string> | string,
-  branch: Ref<string> | string
+  branch: Ref<string> | string,
+  owner =  'Sergo706'
 ) {
   return computed(() => {
     const _content = unref(content);
@@ -12,7 +13,7 @@ export function useMarkdownImageResolver(
 
     if (!_repoName || !_branch) return _content;
 
-    const baseUrl = `https://cdn.jsdelivr.net/gh/Sergo706/${_repoName}@${_branch}/`;
+    const baseUrl = `https://cdn.jsdelivr.net/gh/${owner}/${_repoName}@${_branch}/`;
 
     return _content
       .replace(/!\[(.*?)\]\((?!http)(.*?)\)/g, `![$1](${baseUrl}$2)`)

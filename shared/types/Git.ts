@@ -45,3 +45,25 @@ export interface GitRepoError {
     image?: string;
   };
 }
+export interface CommitCacheEntry {
+  headOid: string;
+  commitCount: number;
+  capped: boolean;
+  fileCommits: Record<string, GitCommit>;
+}
+export interface InitRepoSuccess {
+  branches: string[];
+  tags: string[];
+  currentBranch: string;
+  files: GitFile[];
+  allFiles: string[];
+  lastCommit: GitCommit | null;
+  license: string | null;
+  readme: string | null;
+  commitCount: number;
+  commitCountCapped: boolean;
+}
+
+export type InitRepoResponse = 
+  | { ok: true; data: InitRepoSuccess }
+  | { ok: false; error: GitRepoError };

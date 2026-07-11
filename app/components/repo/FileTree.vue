@@ -9,6 +9,7 @@ defineProps<{
   files: GitFile[];
   repoName: string;
   currentBranch: string;
+  isResolvingCommits: boolean;
 }>();
 
 </script>
@@ -58,6 +59,31 @@ defineProps<{
           </NuxtLink>
         </div>
         <span class="shrink-0 whitespace-nowrap text-right w-24">{{ useTimeAgo(file.commit.date).value }}</span>
+      </div>
+      <div
+        v-else-if="isResolvingCommits"
+        class="flex items-center justify-between text-xs text-white/50 pt-1 truncate min-w-0 flex-1 pl-0 sm:pt-0 gap-4"
+      >
+        <div class="flex items-center gap-2 flex-1 w-full truncate">
+          <USkeleton class="h-5 w-5 rounded-full bg-white/5 shrink-0" />
+          <USkeleton class="h-4 w-3/4 sm:w-64 bg-white/5" />
+        </div>
+        <USkeleton class="h-4 w-16 bg-white/5 shrink-0" />
+      </div>
+      <div
+        v-else
+        class="flex items-center justify-between text-xs text-white/50 pt-1 truncate min-w-0 flex-1 pl-0 sm:pt-0"
+      >
+        <UUser
+          name="No commits"
+          :avatar="{ 
+            icon: 'i-lucide-user',
+            class: 'bg-white/5 text-white/40'
+          }"
+          size="2xs"
+          class="truncate min-w-0 text-white/40"
+          :ui="{ name: 'text-white/40' }"
+        />
       </div>
     </div>
   </div>

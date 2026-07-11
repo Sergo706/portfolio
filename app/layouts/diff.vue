@@ -1,4 +1,5 @@
 <!-- eslint-disable vue/multi-word-component-names -->
+<!-- eslint-disable @typescript-eslint/no-non-null-assertion -->
 <script setup lang="ts">
 import { useGitRepo } from '~/composables/repo/useGitRepo';
 import { useSidebar } from '~/composables/repo/useSideBar';
@@ -35,7 +36,7 @@ const currentCommit = ref<GitCommit | null>(null);
 provide('currentCommit', currentCommit);
 
 const changedFiles = ref<DiffFile[]>([]);
-let gitCache = {};
+
 watch([branch, () => gitRepo.loading.value], async ([newHash, isLoading]) => {
   if (!import.meta.client) return;
   if (isLoading || !newHash) return;
@@ -47,20 +48,14 @@ watch([branch, () => gitRepo.loading.value], async ([newHash, isLoading]) => {
 
   if (viewType.value === 'commit') {
     try {
-      const logs = await gitRepo.git.log({ fs: gitRepo.fs, dir: gitRepo.dir, ref: newHash, depth: 2, cache: gitCache });
-      if (logs[0]) {
+      const logsResult = await gitRepo.getCommitLog(newHash, 2);
+      if (logsResult.ok && logsResult.data.length > 0) {
+        const logs = logsResult.data;
 
-        currentCommit.value = {
-          hash: logs[0].oid,
-          message: logs[0].commit.message.trim(),
-          author: logs[0].commit.author.name,
-          email: logs[0].commit.author.email,
-          date: new Date(logs[0].commit.author.timestamp * 1000),
-          parentHash: logs[0].commit.parent[0]
-        };
+        currentCommit.value = logs[0]!;
 
         if (logs[1]) {
-          const diffResult = await gitRepo.getCommitDiff(logs[1].oid, logs[0].oid);
+          const diffResult = await gitRepo.getCommitDiff(logs[1].hash, logs[0]!.hash);
           if (!diffResult.ok) {
              console.error('[diff.vue] getCommitDiff failed:', diffResult.reason);
              showError({
@@ -73,8 +68,10 @@ watch([branch, () => gitRepo.loading.value], async ([newHash, isLoading]) => {
           currentDiff.value = diffResult.data;
           changedFiles.value = diffResult.data.files;
         } else {
-          const fileList = await gitRepo.git.listFiles({ fs: gitRepo.fs, dir: gitRepo.dir, ref: logs[0].oid });
-          changedFiles.value = fileList.map((f: string) => ({ path: f, type: 'add' as const }));
+          const filesResult = await gitRepo.getCommitFiles(logs[0]!.hash);
+          if (filesResult.ok) {
+             changedFiles.value = filesResult.data.map((f: string) => ({ path: f, type: 'add' as const } as unknown as DiffFile));
+          }
         }
       }
     } catch (e) {
