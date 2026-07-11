@@ -7,9 +7,14 @@ import RepoDiffViewer from '~/components/repo/RepoDiffViewer.vue';
 
 const slug = computed(() => {
   const params = route.params.slug;
+  
+  if (!params) return [];
+
+  if (typeof params === 'string') {
+    return params.split(/[,/]/).filter(Boolean);
+  }
   return Array.isArray(params) ? params : [params];
 });
-
 const repoName = computed(() => slug.value[0] ?? '');
 
 const { data: projects } = await useAsyncData(`project-${repoName.value}`, async () => {
