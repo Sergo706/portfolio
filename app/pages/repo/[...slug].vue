@@ -18,9 +18,10 @@ const slug = computed(() => {
 const repoName = computed(() => slug.value[0] ?? '');
 
 const { data: projects } = await useAsyncData(`project-repo-${repoName.value}`, async () => {
-  return await queryCollection('projects')
-    .where('github', 'LIKE', `%/${repoName.value}%`)
-    .first();
+  const allProjects = await queryCollection('projects').all();
+  const searchString = `/${repoName.value}`.toLowerCase();
+  
+  return allProjects.find(p => p.github.toLowerCase().includes(searchString)) ?? null;
 });
 
 if (!projects.value) {

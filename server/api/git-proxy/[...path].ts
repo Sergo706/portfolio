@@ -15,6 +15,7 @@ export default defineEventHandler(async (event) => {
   
   if (!bucket) {
     const config = useRuntimeConfig();
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     const baseDir = config.reposDir ? path.resolve(config.reposDir as string) : path.resolve(process.cwd(), 'repos');
     const localPath = path.resolve(baseDir, filePath);
     

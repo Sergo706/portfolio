@@ -1,10 +1,8 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 const { data: projects } = await useAsyncData('filtered-projects-list', async () => {
-  return await queryCollection('projects')
-    .where('name', 'NOT LIKE', 'cURL')
-    .where('name', 'NOT LIKE', 'Nuxt')
-    .all();
+   const allProjects = await queryCollection('projects').all();
+   return allProjects.filter(p => p.name !== 'cURL' && p.name !== 'Nuxt');
 });
 </script>
 
