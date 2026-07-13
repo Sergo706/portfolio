@@ -3,6 +3,8 @@
 const { data: projects } = await useAsyncData('projects', async () => {
   return await queryCollection('projects').all();
 });
+const filtered = computed(() => projects.value?.filter(p => p.name !== "cURL" && p.name !== 'Nuxt'));
+
 </script>
 
 <template>
@@ -22,7 +24,7 @@ const { data: projects } = await useAsyncData('projects', async () => {
     <Divider class="mb-8 mt-2" />
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
       <ProjectCard
-        v-for="project in projects"
+        v-for="project in filtered"
         :key="project.name"
         :project
       />

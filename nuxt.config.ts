@@ -99,7 +99,11 @@ export default defineNuxtConfig({
     prerender: {
       autoSubfolderIndex: false,
       crawlLinks: true,
-      routes: ['/'],
+      routes: [
+      '/',
+      '/repo/nuxt', 
+      '/repo/curl'  
+    ],
       ignore: ['/repo/**'],
     },
     preset: "cloudflare-pages",
