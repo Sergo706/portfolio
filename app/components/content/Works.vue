@@ -1,9 +1,9 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
-const { data: projects } = await useAsyncData('projects', async () => {
+const { data: projects } = await useAsyncData('filtered-projects-list', async () => {
   return await queryCollection('projects')
-    .where('name', '<>', 'cURL')
-    .where('name', '<>', 'Nuxt')
+    .where('name', 'NOT LIKE', 'cURL')
+    .where('name', 'NOT LIKE', 'Nuxt')
     .all();
 });
 </script>
