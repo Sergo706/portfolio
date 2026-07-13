@@ -28,7 +28,15 @@ Beyond standard portfolio features, this repository serves as a serverless, read
 
 * Has file views with code highlighting, tree views, commit trees, and filtering functionality.
 
-* Uses aggressive caching.
+* Uses aggressive caching with a global memory cache and IndexedDB fallbacks.
+
+#### Performance & Limitations
+
+You may notice that some files in a folder tree display a **"View History"** label instead of their latest commit message. This occurs because the browser limits its search to a maximum of 1000 commits per folder to conserve CPU and ensure fast load times. If a file hasn't been modified within the last 1000 commits, the initial scan skips it. Clicking "View History" routes you directly to the file or folder's individual view, where its older commit history will be dynamically fetched and displayed.
+
+You can modify this behavior and the limit at `app/workers/git.worker.ts`.
+
+There are forks of the [Nuxt framework](https://github.com/nuxt/nuxt) hosted at [riavzon.com/repo/nuxt](https://riavzon.com/repo/nuxt) and [cURL](https://github.com/curl/curl) hosted at [riavzon.com/repo/curl](https://riavzon.com/repo/curl) to let you see the speed and limitations in action, and to help you decide if this client-side architecture is the right fit for your projects.
 
 ### Portfolio
 

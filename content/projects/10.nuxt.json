@@ -1,0 +1,11 @@
+{
+    "name": "Nuxt",
+    "image": "https://github.com/nuxt/nuxt/raw/main/.github/assets/banner.svg",
+    "github": "https://github.com/nuxt/nuxt",
+    "link": "https://nuxt.com",
+    "release": "2016",
+    "date": "2016",
+    "featured": false,
+    "owner": "nuxt",
+    "description": "The Intuitive Vue Framework. This repo is a fork and doesn't reflect the absolute latest changes of the Nuxt framework, and serves as a demonstration of the Git viewer."
+}

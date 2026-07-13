@@ -83,7 +83,7 @@ export class GitWorkerClass {
       }
 
       const branches = await git.listBranches({ fs: this.fs, dir: this.dir });
-      this.currentBranch ??= branches.includes('main') ? 'main' : branches[0] ?? '';
+      this.currentBranch ??= branches.includes('main') ? 'main' : (branches.includes('master') ? 'master' : (branches[0] ?? ''));
       
       const tags = await git.listTags({ fs: this.fs, dir: this.dir });
 
@@ -207,7 +207,7 @@ export class GitWorkerClass {
             commitCount = allCommits.length;
             commitCountCapped = allCommits.length >= this.LOG_DEPTH_CAP;
 
-            await resolveTreeCommitsAsync(items, allCommits, this.fs, this.dir, this.cache.gitCache);
+            await resolveTreeCommitsAsync(items, allCommits, this.fs, this.dir, this.cache.gitCache, undefined, undefined, this.cache.parsedTreeCache);
             if (onProgress) onProgress(items, commitCount, commitCountCapped);
 
             void this.cache.saveCommitCacheToIDB(
@@ -363,7 +363,7 @@ export class GitWorkerClass {
 
       const resolvePromise = async () => {
         try {
-          await resolveTreeCommitsAsync(items, searchCommits, this.fs, this.dir, this.cache.gitCache, treePath, 'name');
+          await resolveTreeCommitsAsync(items, searchCommits, this.fs, this.dir, this.cache.gitCache, treePath, 'name', this.cache.parsedTreeCache);
           this.cache.folderCommitCache.set(cacheKey, items);
           if (onProgress) onProgress(items, true);
         } catch (e) {

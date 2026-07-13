@@ -1,0 +1,11 @@
+{
+    "name": "cURL",
+    "image": "/projects/curl.png",
+    "github": "https://github.com/curl/curl",
+    "link": "https://curl.se",
+    "release": "1998",
+    "date": "1998",
+    "featured": false,
+    "owner": "curl",
+    "description": "Command line tool and library for transferring data with URLs. This repo is a fork and doesn't reflect the absolute latest changes of the curl project, and serves as a demonstration of the Git viewer."
+}

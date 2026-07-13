@@ -1,7 +1,10 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 const { data: projects } = await useAsyncData('projects', async () => {
-  return await queryCollection('projects').all();
+  return await queryCollection('projects')
+    .where('name', '<>', 'cURL')
+    .where('name', '<>', 'Nuxt')
+    .all();
 });
 </script>
 

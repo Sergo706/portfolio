@@ -1,4 +1,4 @@
-import type { ReadCommitResult } from 'isomorphic-git';
+import type { ReadCommitResult, TreeEntry } from 'isomorphic-git';
 import type { CommitCacheEntry, GitFile, GitCommit, DiffFile } from '~~/shared/types/Git';
 import type LightningFS from '@isomorphic-git/lightning-fs';
 import type { Results } from '@riavzon/utils';
@@ -9,6 +9,7 @@ export function useGitRepoCache(dir: string, fs: LightningFS, LOG_DEPTH_CAP: num
     const commitLogCache = new Map<string, ReadCommitResult[]>();
     const diffCache = new Map<string, Results<{files: DiffFile[], stats: {filesChanged: number, insertions: number, deletions: number}}>>();
     const folderCommitCache = new Map<string, GitFile[]>();
+    const parsedTreeCache = new Map<string, Promise<TreeEntry[]>>();
     const gitCache: Record<string, unknown> = {};
 
     function clearCache() {
@@ -19,6 +20,7 @@ export function useGitRepoCache(dir: string, fs: LightningFS, LOG_DEPTH_CAP: num
         commitLogCache.clear();
         diffCache.clear();
         folderCommitCache.clear();
+        parsedTreeCache.clear();
     };
 
     async function loadCommitCacheFromIDB(branch: string, headOid: string): Promise<CommitCacheEntry | null> {
@@ -57,6 +59,20 @@ export function useGitRepoCache(dir: string, fs: LightningFS, LOG_DEPTH_CAP: num
             }
         }
         
+        const headOid = await git.resolveRef({ fs, dir, ref });
+        const cachePath = `${dir}/.commit-log-${ref}-${capped ? 'capped' : 'full'}.json`;
+
+        try {
+            const data = await fs.promises.readFile(cachePath, { encoding: 'utf8' });
+            const parsed = JSON.parse(data) as { headOid: string; commits: ReadCommitResult[] };
+            if (parsed.headOid === headOid) {
+                commitLogCache.set(ref, parsed.commits);
+                return parsed.commits;
+            }
+        } catch {
+
+        }
+
         const commits = await git.log({ 
             fs, 
             dir, 
@@ -66,6 +82,13 @@ export function useGitRepoCache(dir: string, fs: LightningFS, LOG_DEPTH_CAP: num
         });
         
         commitLogCache.set(ref, commits);
+
+        try {
+            await fs.promises.writeFile(cachePath, JSON.stringify({ headOid, commits }));
+        } catch {
+            console.warn('Failed to save commit log cache');
+        }
+
         return commits;
     }
 
@@ -77,6 +100,7 @@ export function useGitRepoCache(dir: string, fs: LightningFS, LOG_DEPTH_CAP: num
     saveCommitCacheToIDB,
     getCachedCommits,
     diffCache,
-    folderCommitCache
+    folderCommitCache,
+    parsedTreeCache
   };
 }

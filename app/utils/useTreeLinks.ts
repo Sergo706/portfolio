@@ -43,6 +43,8 @@ const fileAliases: Record<string, string> = {
   'bash': 'shell',
   'py': 'python',
   'pyc': 'python',
+  'pl': 'perl',
+  'pm': 'perl',
   'dockerfile': 'docker',
   'package.json': 'npm',
   '.npmignore': 'npm',
@@ -55,7 +57,6 @@ const fileAliases: Record<string, string> = {
   'js': 'js',
   'mjs': 'js',
   'jsx': 'jsx',
-  'txt': 'txt',
   'csv': 'csv',
   'xml': 'xml',
   'zip': 'zip',
@@ -65,7 +66,6 @@ const fileAliases: Record<string, string> = {
   'java': 'java',
   'c': 'c',
   'cpp': 'cpp',
-  'h': 'h',
   'hpp': 'hpp',
   'cs': 'cs',
   'go': 'go',
@@ -120,6 +120,11 @@ export const getIcon = (itemPath: string, isFile: boolean) => {
   if (name.includes('eslint')) return 'i-vscode-icons-file-type-eslint';
   if (name.includes('prettier')) return 'i-vscode-icons-file-type-prettier';
   if (name.startsWith('.env')) return 'i-vscode-icons-file-type-dotenv';
+  if (name.endsWith('.h')) return 'i-vscode-icons-file-type-cheader';
+  if (name.endsWith('.m4')  || name.endsWith('.am')) return 'i-vscode-icons-file-type-gnu';
+  if (name.endsWith('.cmd') || name.endsWith('.bat')) return 'i-vscode-icons-file-type-bat';
+  if (name.endsWith('.txt')) return 'i-vscode-icons-file-type-text';
+  if (name.endsWith('.cmake')) return 'i-vscode-icons-file-type-cmake';
 
   const parts = name.split('.');
   const ext = parts.length > 1 ? parts.pop()?.toLowerCase() ?? '' : '';

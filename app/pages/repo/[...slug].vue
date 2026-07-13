@@ -46,7 +46,7 @@ const viewType = computed(() => {
   return 'main';
 });
 
-const branch = computed(() => ['tree', 'blob', 'commits', 'commit'].includes(slug.value[1] ?? '') ? (slug.value[2] ?? 'main') : 'main');
+const branch = computed(() => ['tree', 'blob', 'commits', 'commit'].includes(slug.value[1] ?? '') ? slug.value[2] : undefined);
 const path = computed(() => ['tree', 'blob', 'commits', 'commit'].includes(slug.value[1] ?? '') ? slug.value.slice(3).join('/') : undefined);
 
 definePageMeta({
@@ -88,7 +88,7 @@ definePageMeta({
         <RepoFileViewer
           v-else-if="viewType === 'file' || viewType === 'tree'"
           :repo-name="repoName"
-          :branch="branch"
+          :branch="branch ?? ''"
           :file-path="path"
           :is-tree="viewType === 'tree'"
           :owner="projects.owner"

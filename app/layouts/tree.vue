@@ -14,11 +14,18 @@ const slug = computed(() => {
 
 const repoName = computed(() => slug.value[0] ?? '');
 const viewType = computed(() => slug.value[1] ?? 'main');
-const branch = computed(() => ['tree', 'blob', 'commits', 'commit'].includes(viewType.value) ? (slug.value[2] ?? 'main') : 'main');
 
 const gitRepo = useGitRepo(repoName.value);
 const { allFiles, switchBranch, currentBranch, branches, tags } = gitRepo;
 provide<ReturnType<typeof useGitRepo>>('gitRepo', gitRepo);
+
+const branch = computed(() => {
+  const urlBranch = ['tree', 'blob', 'commits', 'commit'].includes(viewType.value) ? slug.value[2] : undefined;
+
+  if (urlBranch) return urlBranch;
+  
+  return branches.value.includes('main') ? 'main' : (branches.value.includes('master') ? 'master' : 'main');
+});
 
 watch(branch, async (newBranch) => {
   if (newBranch && newBranch !== currentBranch.value) {

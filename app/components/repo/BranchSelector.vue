@@ -16,7 +16,7 @@ watch(() => props.currentRef, (newRef) => {
 
 const activeTabIndex = ref('0');
 const searchTerm = ref('');
-const defaultBranch = computed(() => props.branches?.includes('main') ? 'main' : props.branches?.[0]);
+const defaultBranch = computed(() => props.branches?.includes('main') ? 'main' : (props.branches?.includes('master') ? 'master' : props.branches?.[0]));
 
 const orderedBranches = computed(() => {
   if (!props.branches) return [];

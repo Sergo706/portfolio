@@ -16,11 +16,17 @@ const slug = computed(() => {
 
 const repoName = computed(() => slug.value[0] ?? '');
 const viewType = computed(() => slug.value[1] ?? 'main');
-const branch = computed(() => ['tree', 'blob', 'commits', 'commit'].includes(viewType.value) ? (slug.value[2] ?? 'main') : 'main');
 
 const { open } = useSidebar();
 const gitRepo = useGitRepo(repoName.value);
 const { switchBranch, currentBranch, branches, tags } = gitRepo;
+
+const branch = computed(() => {
+  const urlBranch = ['tree', 'blob', 'commits', 'commit'].includes(slug.value[1] ?? '') ? slug.value[2] : undefined;
+  
+  if (urlBranch) return urlBranch;
+  return branches.value.includes('main') ? 'main' : (branches.value.includes('master') ? 'master' : 'main');
+});
 
 provide<ReturnType<typeof useGitRepo>>('gitRepo', gitRepo);
 const currentDiff = ref<{ 

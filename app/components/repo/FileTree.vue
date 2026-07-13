@@ -75,9 +75,10 @@ defineProps<{
         class="flex items-center justify-between text-xs text-white/50 pt-1 truncate min-w-0 flex-1 pl-0 sm:pt-0"
       >
         <UUser
-          name="No commits"
+          name="View History"
+          :to="file.type === 'file' ? `/repo/${repoName}/blob/${currentBranch}/${file.path}` : `/repo/${repoName}/tree/${currentBranch}/${file.path}`"
           :avatar="{ 
-            icon: 'i-lucide-user',
+            icon: 'i-lucide-history',
             class: 'bg-white/5 text-white/40'
           }"
           size="2xs"

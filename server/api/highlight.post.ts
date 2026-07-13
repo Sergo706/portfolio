@@ -19,6 +19,10 @@ function getHighlighter(): Promise<HighlighterCore> {
         import('shiki/langs/pascal.mjs'),
         import('shiki/langs/docker.mjs'),
         import('shiki/langs/python.mjs'),
+        import('shiki/langs/c.mjs'),
+        import('shiki/langs/makefile.mjs'),
+        import('shiki/langs/cmake.mjs'),
+        import('shiki/langs/perl.mjs'),
         import('shiki/langs/json.mjs'),
         import('shiki/langs/yml.mjs'),
         import('shiki/langs/yaml.mjs'),
@@ -54,7 +58,16 @@ function resolveLang(filePath: string) {
 
   if (name.startsWith('.')) return 'bash';
   if (name === 'dockerfile') return 'dockerfile';
-  return name.split('.').pop() ?? 'text';
+  if (name === 'makefile') return 'makefile';
+  if (name === 'cmakelists.txt') return 'cmake';
+  if (!name.includes('.')) return 'bash';
+  
+  const ext = name.split('.').pop() ?? 'bash';
+  if (ext === 'txt') return 'text';
+  if (ext === 'pl' || ext === 'pm') return 'perl';
+  
+  const supported = ['ts', 'js', 'vue', 'diff', 'pascal', 'docker', 'c', 'makefile', 'perl', 'cmake', 'py', 'json', 'yml', 'yaml', 'dockerfile', 'dotenv', 'bash', 'sh', 'html', 'css', 'xml', 'md', 'sql', 'text'];
+  return supported.includes(ext) ? ext : 'bash';
 }
 
 export default defineEventHandler(async (event) => {
@@ -70,7 +83,7 @@ export default defineEventHandler(async (event) => {
   
   highlightCache ??= new MiniCache<string>(500);
 
-  const cacheKey = `${targetLang ?? 'text'}:${code}`;
+  const cacheKey = `${targetLang ?? 'bash'}:${code}`;
   const cachedHtml = highlightCache.get(cacheKey);
   
   if (cachedHtml) {
@@ -80,7 +93,7 @@ export default defineEventHandler(async (event) => {
   try {
     const highlighter = await getHighlighter();
     const loadedLangs = highlighter.getLoadedLanguages();
-    const safeLang = targetLang && loadedLangs.includes(targetLang) ? targetLang : 'text';
+    const safeLang = targetLang && loadedLangs.includes(targetLang) ? targetLang : 'bash';
 
     const html = highlighter.codeToHtml(code, {
       lang: safeLang,

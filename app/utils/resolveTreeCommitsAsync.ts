@@ -1,5 +1,7 @@
-import git, { type ReadCommitResult } from 'isomorphic-git';
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import git, { type ReadCommitResult, type TreeEntry } from 'isomorphic-git';
 import type LightningFS from '@isomorphic-git/lightning-fs';
+import type { GitFile } from '~~/shared/types/Git';
 
 
 export async function resolveTreeCommitsAsync(
@@ -10,11 +12,47 @@ export async function resolveTreeCommitsAsync(
     gitCache: object,
     treePath?: string,
     keyField: 'path' | 'name' = 'path',
+    parsedTreeCache?: Map<string, Promise<TreeEntry[]>>
   ): Promise<void> {
     const unresolvedKeys = new Set(items.map(i => i[keyField]));
     const itemsByKey = new Map(items.map(i => [i[keyField], i]));
 
     let iteration = 0;
+
+    const getTreeByOid = (oid: string): Promise<TreeEntry[]> => {
+      if (parsedTreeCache?.has(oid)) return parsedTreeCache.get(oid)!;
+      const promise = git.readTree({ fs, dir, oid, cache: gitCache }).then(res => res.tree).catch(() => []);
+      if (parsedTreeCache) parsedTreeCache.set(oid, promise);
+      return promise;
+    };
+
+    const folderTreeCache = new Map<string, Promise<{ oid: string, tree: TreeEntry[] } | null>>();
+
+    const getFolderTree = (commitOid: string) => {
+      if (folderTreeCache.has(commitOid)) return folderTreeCache.get(commitOid)!;
+      
+      const promise = (async () => {
+        try {
+          let currentOid = commitOid;
+          if (treePath) {
+            const parts = treePath.split('/');
+            for (const part of parts) {
+              const tree = await getTreeByOid(currentOid);
+              const entry = tree.find(e => e.path === part);
+              if (!entry) return null;
+              currentOid = entry.oid;
+            }
+          }
+          const tree = await getTreeByOid(currentOid);
+          return { oid: currentOid, tree };
+        } catch {
+          return null;
+        }
+      })();
+      
+      folderTreeCache.set(commitOid, promise);
+      return promise;
+    };
 
     for (const commit of allCommits) {
       if (unresolvedKeys.size === 0) break;
@@ -24,22 +62,21 @@ export async function resolveTreeCommitsAsync(
       }
       
       try {
-        const { tree: currentTree } = await git.readTree({ fs, dir, oid: commit.oid, filepath: treePath, cache: gitCache });
-        const currentMap = new Map(currentTree.map(e => [e.path, e.oid]));
+        const currentTreeData = await getFolderTree(commit.oid);
+        const currentTreeOid = currentTreeData?.oid;
 
         const parentOid = commit.commit.parent[0];
-        let parentMap: Map<string, string>;
+        const parentTreeData = parentOid ? await getFolderTree(parentOid) : null;
+        const parentTreeOid = parentTreeData?.oid;
 
-        if (parentOid) {
-          try {
-            const { tree: parentTree } = await git.readTree({ fs, dir, oid: parentOid, filepath: treePath, cache: gitCache });
-            parentMap = new Map(parentTree.map(e => [e.path, e.oid]));
-          } catch {
-            parentMap = new Map();
-          }
-        } else {
-          parentMap = new Map();
-        }
+        if (currentTreeOid === parentTreeOid) continue;
+        
+
+        const currentTree = currentTreeData?.tree;
+        const parentTree = parentTreeData?.tree;
+
+        const currentMap = new Map(currentTree?.map(e => [e.path, e.oid]) ?? []);
+        const parentMap = new Map(parentTree?.map(e => [e.path, e.oid]) ?? []);
 
         for (const key of unresolvedKeys) {
           const currentOid = currentMap.get(key);

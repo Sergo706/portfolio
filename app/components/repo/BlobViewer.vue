@@ -19,7 +19,17 @@ const lang = computed(() => {
 
   if (name.startsWith('.')) return 'bash';
   if (name === 'dockerfile') return 'dockerfile';
-  return name.split('.').pop() ?? 'text';
+  if (name === 'makefile') return 'makefile';
+  if (name === 'cmakelists.txt') return 'cmake';
+  if (!name.includes('.')) return 'bash';
+  
+  const ext = name.split('.').pop() ?? 'bash';
+  if (ext === 'txt') return 'text';
+  if (ext === 'pl' || ext === 'pm') return 'perl';
+
+  
+  const supported = ['ts', 'js', 'vue', 'diff', 'pascal', 'docker', 'c', 'makefile', 'perl', 'cmake', 'py', 'json', 'yml', 'yaml', 'dockerfile', 'dotenv', 'bash', 'sh', 'html', 'css', 'xml', 'md', 'sql', 'text'];
+  return supported.includes(ext) ? ext : 'bash';
 });
 
 const isWrapped = defineModel<boolean>();
