@@ -85,7 +85,15 @@ export default defineNuxtConfig({
 
   routeRules: {
     '/': { prerender: true },
-    '/api/contact': { prerender: false, cors: true }
+    '/api/contact': { prerender: false, cors: true },
+    '/repo/*/commit/**': { ssr: false },
+    '/repo/*/tree/**': { ssr: false },
+    '/repo/*/blob/**': { ssr: false },
+    '/repo/*/commits/**':{ ssr: false },
+    '/repo/*/commit': { ssr: false },
+    '/repo/*/tree': { ssr: false },
+    '/repo/*/blob': { ssr: false },
+    '/repo/*/commits': { ssr: false },
   },
 
   experimental: {
@@ -102,8 +110,9 @@ export default defineNuxtConfig({
       routes: [
       '/',
       '/repo/nuxt', 
-      '/repo/curl'  
+      '/repo/curl',  
     ],
+    
       ignore: ['/repo/**'],
     },
     preset: "cloudflare-pages",
