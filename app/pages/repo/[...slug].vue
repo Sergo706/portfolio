@@ -23,7 +23,7 @@ const { data: projects } = await useAsyncData(`project-repo-${repoName.value}`, 
   console.log('all projects main page view', allProjects)
   const searchTarget = `/${repoName.value}`.toLowerCase();
   
-  return allProjects.find(p => p.github.toLowerCase().includes(searchTarget)) || null;
+  return allProjects.find(p => p.github.toLowerCase().includes(searchTarget)) ?? null;
 });
 console.log(`Searching for:`, repoName.value);
 console.log(`Found project:`, projects.value?.name);
