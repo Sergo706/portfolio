@@ -3,8 +3,6 @@
 const { data: projects } = await useAsyncData('projects', async () => {
   return await queryCollection('projects').all();
 });
-const filtered = computed(() => projects.value?.filter(p => p.name !== "cURL" && p.name !== 'Nuxt'));
-
 </script>
 
 <template>
