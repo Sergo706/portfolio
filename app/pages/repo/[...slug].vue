@@ -16,14 +16,14 @@ const slug = computed(() => {
   return Array.isArray(params) ? params : [params];
 });
 const repoName = computed(() => slug.value[0] ?? '');
+console.log(`slug`, slug.value);
 
 const { data: projects } = await useAsyncData(`project-repo-${repoName.value}`, async () => {
-  const allProjects = await queryCollection('projects').all();
-  const searchString = `/${repoName.value}`.toLowerCase();
-  
-  return allProjects.find(p => p.github.toLowerCase().includes(searchString)) ?? null;
+  return await queryCollection('projects')
+    .where('github', 'LIKE', `%/${repoName.value}%`)
+    .first();
 });
-
+console.log(`project from main page view`, projects.value);
 if (!projects.value) {
   throw createError({
       statusCode: 404,
