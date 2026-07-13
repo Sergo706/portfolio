@@ -165,7 +165,7 @@ const handlePageChange = (page: number) => {
     >
       <template #description>
         <div class="flex-col sm:flex-row sm:items-center gap-4 mt-2">
-          <span class="text-white/50">History for</span>
+          <span class="text-white/50">History for </span>
           <RepoBreadcrumbs
             v-if="filePath"
             :repo-name="repoName"
