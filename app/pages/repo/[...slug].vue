@@ -19,10 +19,14 @@ const repoName = computed(() => slug.value[0] ?? '');
 console.log(`slug`, slug.value);
 
 const { data: projects } = await useAsyncData(`project-repo-${repoName.value}`, async () => {
-  return await queryCollection('projects')
-    .where('github', 'LIKE', `%/${repoName.value}%`)
-    .first();
+  const allProjects = await queryCollection('projects').all();
+  console.log('all projects main page view', allProjects)
+  const searchTarget = `/${repoName.value}`.toLowerCase();
+  
+  return allProjects.find(p => p.github.toLowerCase().includes(searchTarget)) || null;
 });
+console.log(`Searching for:`, repoName.value);
+console.log(`Found project:`, projects.value?.name);
 console.log(`project from main page view`, projects.value);
 if (!projects.value) {
   throw createError({
