@@ -44,7 +44,7 @@ export default defineNuxtConfig({
     preference: 'dark',
     fallback: 'dark',
   },
-
+ 
   mdc: {
     highlight: {
       langs: [
