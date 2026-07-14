@@ -44,13 +44,19 @@ const toggleTag = (tag: string) => {
       />
     </h2>
     <Divider class="mb-8 mt-2" />
-    <div :class="showSearch ? '' : 'mb-3'">
+    <div :class="showSearch ? '' : 'mb-3'" class="flex items-center justify-between">
       <span
-        class="font-newsreader italic text-white-shadow cursor-pointer select-none text-lg"
+        class="font-newsreader italic text-white-shadow cursor-pointer select-none text-lg hover:opacity-80 transition-opacity"
         @click="showSearch = !showSearch"
       >
         {{ showSearch ? "Hide filters" : "Search articles" }}
       </span>
+      <NuxtLink
+        to="/guides"
+        class="font-newsreader italic text-muted hover:text-white-shadow cursor-pointer select-none text-lg transition-colors duration-200"
+      >
+        Knowledge Base &rarr;
+      </NuxtLink>
     </div>
     <div
       v-if="showSearch"

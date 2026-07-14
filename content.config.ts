@@ -16,6 +16,17 @@ const articleSchema = z.object({
   tags: z.array(z.string().nonempty()),
 })
 
+const knowledgeBaseSchema = z.object({
+  title: z.string().nonempty(),
+  description: z.string().nonempty(),
+  date: z.string().nonempty(),
+  image: z.string().url().optional(),
+  readingTime: z.string().nonempty(),
+  contentType: z.enum(["guide", "tutorial", "recipe"]),
+  category: z.string(),
+  tags: z.array(z.string().nonempty()),
+})
+
 const projectSchema = z.object({
   name: z.string().nonempty(),
   description: z.string().optional(),
@@ -51,9 +62,19 @@ export const collections = {
       type: 'page',
       source: {
         include: '**/*.md',
-        exclude: ['articles/*.md'],
+        exclude: ['articles/*.md', 'knowledge-base/*.md'],
       },
       schema: contentSchema,
+    }),
+  ),
+
+  knowledgeBase: defineCollection(
+    asSeoCollection({ 
+      type: 'page',
+      source: {
+        include: 'knowledge-base/*.md',
+      },
+      schema: knowledgeBaseSchema,
     }),
   ),
 
