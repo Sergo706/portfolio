@@ -60,6 +60,7 @@ export default defineNuxtConfig({
         "makefile",
         "perl",
         "cmake",
+        "ini",
         "py",
         'json',
         "yml",
