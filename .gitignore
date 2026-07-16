@@ -14,7 +14,7 @@ node_modules
 .data
 .wrangler
 rt_base
-
+research
 .history
 .env*.local
 repo.md
