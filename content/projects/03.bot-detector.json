@@ -4,8 +4,8 @@
     "link": "https://docs.riavzon.com/docs/bot-detection",
     "github": "https://github.com/Sergo706/botDetector",
     "npm": "https://www.npmjs.com/package/@riavzon/bot-detector",
-    "release": "2025",
-    "date": "2024",
+    "release": "2024",
+    "date": "2023",
     "featured": true,
     "description": "Express middleware that scores requests through a two‑phase pipeline of 17 checkers (IP/geo/TLS/fingerprint/behavior/custom), backed by Shield‑Base threat data; auto-generates typed high‑risk/banned MMDBs from visitor history, includes a CLI to manage data sources, and supports configurable ban thresholds and optional firewall enforcement."
 }
