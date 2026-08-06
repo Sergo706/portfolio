@@ -4,6 +4,7 @@
   "link": "https://docs.riavzon.com/docs/utils",
   "github": "https://github.com/Sergo706/utils",
   "npm": "https://www.npmjs.com/package/@riavzon/utils",
+  "isPublicRepo": true,
   "release": "2025",
   "date": "2026",
   "featured": false,

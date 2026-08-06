@@ -4,6 +4,7 @@
   "link": "https://docs.riavzon.com/docs/iam",
   "github": "https://github.com/Sergo706/auth",
   "npm": "https://www.npmjs.com/package/@riavzon/auth",
+  "isPublicRepo": true,
   "release": "2025",
   "date": "2024",
   "featured": true,

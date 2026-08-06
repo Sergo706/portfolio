@@ -3,6 +3,7 @@
   "image": "/projects/docshub.png",
   "link": "https://docs.riavzon.com",
   "github": "https://github.com/Sergo706/docshub",
+  "isPublicRepo": true,
   "release": "2026",
   "date": "2026",
   "featured": false,

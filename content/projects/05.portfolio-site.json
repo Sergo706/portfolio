@@ -3,8 +3,9 @@
     "image": "/projects/portfolio.png",
     "link": "https://riavzon.com",
     "github": "https://github.com/Sergo706/portfolio",
+    "isPublicRepo": true,
     "release": "2026",
     "date": "2026",
-    "featured": false,
+    "featured": true,
     "description": "Personal website built with Nuxt and deployed to the Cloudflare edge. Features a file-based CMS and a custom-built, read-only Git proxy that parses and highlights repository diffs natively."
 }

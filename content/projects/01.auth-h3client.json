@@ -4,6 +4,7 @@
     "link": "https://docs.riavzon.com/docs/auth-h3client",
     "github": "https://github.com/Sergo706/auth-h3client",
     "npm": "https://www.npmjs.com/package/@riavzon/auth-h3client",
+    "isPublicRepo": true,
     "release": "2025",
     "date": "2025",
     "featured": true,

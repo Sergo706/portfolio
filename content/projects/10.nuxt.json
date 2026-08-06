@@ -3,6 +3,7 @@
     "image": "https://github.com/nuxt/nuxt/raw/main/.github/assets/banner.svg",
     "github": "https://github.com/nuxt/nuxt",
     "link": "https://nuxt.com",
+    "isPublicRepo": true,
     "release": "2016",
     "date": "2016",
     "featured": false,

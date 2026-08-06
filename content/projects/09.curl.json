@@ -3,6 +3,7 @@
     "image": "/projects/curl.png",
     "github": "https://github.com/curl/curl",
     "link": "https://curl.se",
+    "isPublicRepo": true,
     "release": "1998",
     "date": "1998",
     "featured": false,

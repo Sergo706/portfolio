@@ -5,7 +5,9 @@ const props = defineProps<{
     name: string;
     release: string;
     image: string;
-    github: string;
+    github?: string;
+    isPublicRepo: boolean;
+    link?: string;
     npm?: string;
     description?: string;
   };
@@ -13,6 +15,8 @@ const props = defineProps<{
 
 const img = useImage();
 const repoSlug = computed(() => {
+  if (!props.project.isPublicRepo || !props.project.github) return '';
+
   try {
     const url = new URL(props.project.github);
     const parts = url.pathname.split('/').filter(Boolean);
@@ -23,13 +27,16 @@ const repoSlug = computed(() => {
   }
 });
 
+const projectLink = computed(() => repoSlug.value ? `/repo/${repoSlug.value}` : props.project.link ?? props.project.github);
+
 </script>
 
 <template>
   <NuxtLink
     :aria-label="project.name + ' project link'"
-    :to="repoSlug ? `/repo/${repoSlug}` : project.github"
-    class="group relative flex cursor-pointer flex-col gap-1 rounded-lg border border-white/10 bg-zinc-900/80 p-1 shadow-2xl shadow-zinc-950/50 backdrop-blur-sm"
+    :to="projectLink"
+    :target="repoSlug ? undefined : '_blank'"
+    class="group relative flex h-full cursor-pointer flex-col gap-1 rounded-lg border border-white/10 bg-zinc-900/80 p-1 shadow-2xl shadow-zinc-950/50 backdrop-blur-sm"
   >
     <div class="flex items-center justify-center py-[3px]">
       <div class="flex gap-1 px-2  mr-auto">
@@ -76,14 +83,14 @@ const repoSlug = computed(() => {
 
       <div
         v-if="project.description"
-        class="absolute inset-0 flex items-center justify-center p-6 text-center text-sm text-white/90 drop-shadow-md opacity-0 translate-y-8 transition-all duration-500 ease-out group-hover:translate-y-0 group-hover:opacity-100"
+        class="absolute inset-0 hidden items-center justify-center p-6 text-center text-sm text-white/90 drop-shadow-md opacity-0 translate-y-8 transition-all duration-500 ease-out group-hover:translate-y-0 group-hover:opacity-100 lg:flex"
       >
         {{ project.description }}
       </div>
     </div>
-    <div class="absolute bottom-0 z-10 flex w-full justify-center">
-      <div class="rounded-t-lg border-x border-t border-white/10 border-b-transparent px-4 py-[5px] shadow-md backdrop-blur-md sm:w-2/3">
-        <div class="flex items-center justify-between gap-2">
+    <div class="z-10 flex w-full flex-1 justify-center lg:absolute lg:bottom-0 lg:flex-none">
+      <div class="flex w-full flex-1 flex-col overflow-hidden rounded-lg border border-white/10 bg-zinc-950/95 shadow-md lg:w-2/3 lg:flex-none lg:rounded-b-none lg:border-b-0 lg:bg-zinc-900/60 lg:backdrop-blur-md">
+        <div class="flex items-center justify-between gap-2 px-4 py-2.5 lg:py-[5px]">
           <div class="flex items-center gap-2">
             <div class="flex items-center gap-2">
               <span class="whitespace-nowrap text-sm font-semibold text-white/90">
@@ -103,6 +110,13 @@ const repoSlug = computed(() => {
             />
           </div>
         </div>
+
+        <p
+          v-if="project.description"
+          class="flex-1 border-t border-white/10 px-4 py-3 text-xs leading-5 text-zinc-400 lg:hidden"
+        >
+          {{ project.description }}
+        </p>
       </div>
     </div>
   </NuxtLink>

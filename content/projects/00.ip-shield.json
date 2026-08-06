@@ -1,0 +1,10 @@
+{
+    "name": "IP Shield",
+    "image": "/projects/ip-shield.png",
+    "link": "https://ip-shield.riavzon.com/",
+    "release": "2026",
+    "date": "2026",
+    "isPublicRepo": true,
+    "featured": true,
+    "description": "API-first SaaS platform for IP intelligence and request security, providing bot and threat detection, traffic-risk analysis, identity-aware access controls, and a web dashboard. Runs as a hardened, observable multi-service deployment on a self-managed Linux VM"
+}

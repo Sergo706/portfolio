@@ -1,21 +1,26 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts">
 
-defineProps<{
-  projects: {
+interface Project {
     name: string;
     release: string;
     image: string;
-    link?: string;
-    github: string;
     npm?: string;
+    github?: string;
+    isPublicRepo: boolean;
+    link?: string;
     description?: string;
     featured?: boolean;
-  }[];
+}
+
+const props = defineProps<{
+  projects: Project[];
 }>();
 
 
-const repoSlug = (github: string) => {
+const repoSlug = (github?: string) => {
+  if (!github) return '';
+
   try {
     const url = new URL(github);
     const parts = url.pathname.split('/').filter(Boolean);
@@ -26,19 +31,30 @@ const repoSlug = (github: string) => {
   }
 };
 
+const featuredProjects = computed(() => props.projects
+  .filter(project => project.featured)
+  .map((project) => {
+    const slug = project.isPublicRepo ? repoSlug(project.github) : '';
+
+    return {
+      ...project,
+      destination: slug ? `/repo/${slug}` : project.link ?? project.github,
+      isRepoView: Boolean(slug),
+    };
+  }));
+
 </script>
 
 
 <template>
   <div class="flex w-full flex-col gap-4">
     <NuxtLink
-      v-for="project in projects?.filter((work) => work.featured)"
+      v-for="project in featuredProjects"
       :key="project.name"
-      role="link"
       class="flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 hover:bg-neutral-900"
-      :to="project.release === 'soon' ? '/' : repoSlug(project.github) ? `/repo/${repoSlug(project.github)}` : project.link"
-      :aria-label="'go to ' + project.name + ' project website'"
-      :target="project.release === 'soon' ? '_self' : '_blank'"
+      :to="project.destination"
+      :aria-label="'Go to ' + project.name + ' project'"
+      :target="project.isRepoView ? undefined : '_blank'"
     >
       <span class="whitespace-nowrap font-medium">
         {{ project.name }}

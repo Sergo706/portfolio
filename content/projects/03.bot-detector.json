@@ -4,6 +4,7 @@
     "link": "https://docs.riavzon.com/docs/bot-detection",
     "github": "https://github.com/Sergo706/botDetector",
     "npm": "https://www.npmjs.com/package/@riavzon/bot-detector",
+    "isPublicRepo": true,
     "release": "2024",
     "date": "2023",
     "featured": true,
