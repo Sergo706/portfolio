@@ -20,7 +20,7 @@
     "@nuxt/content": "3.11.2",
     "@nuxt/image": "2.0.0",
     "@nuxt/scripts": "^0.11.0 || ^0.12.0 || 0.13.2",
-    "@nuxt/ui": "4.4.0",
+    "@nuxt/ui": "4.8.1",
     "@nuxtjs/seo": "3.4.0",
     "@nuxtjs/turnstile": "1.1.1",
     "@riavzon/utils": "^1.3.0",
