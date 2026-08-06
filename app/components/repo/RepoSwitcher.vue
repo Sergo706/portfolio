@@ -17,6 +17,7 @@ const repos = computed<string[]>(() => {
   return projects.value
     .filter((p: ProjectsCollectionItem) => p.github)
     .map((p: ProjectsCollectionItem) => {
+      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
       const parts = (p.github || '').split('/');
       return parts.pop() ?? '';
     });
