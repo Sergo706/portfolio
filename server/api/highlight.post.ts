@@ -17,6 +17,7 @@ function getHighlighter(): Promise<HighlighterCore> {
         import('shiki/langs/vue.mjs'),
         import('shiki/langs/diff.mjs'),
         import('shiki/langs/pascal.mjs'),
+        import('shiki/langs/csharp.mjs'),
         import('shiki/langs/docker.mjs'),
         import('shiki/langs/python.mjs'),
         import('shiki/langs/c.mjs'),
