@@ -1,0 +1,10 @@
+{
+  "name": "csharp",
+  "image": "/projects/bot-detector.png",
+  "github": "https://github.com/Sergo706/csharp",
+  "isPublicRepo": true,
+  "release": "2026",
+  "date": "2026",
+  "featured": true,
+  "description": "C# and .NET sandbox: small ASP.NET Core projects covering EF Core, Identity, OAuth, and API design — built around DocsParser, a document‑conversion web app with a Nuxt frontend."
+}
