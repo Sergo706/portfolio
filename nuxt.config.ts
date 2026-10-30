@@ -57,6 +57,7 @@ export default defineNuxtConfig({
         'pascal',
         'docker',
         'csharp',
+        'cs',
         "c",
         "makefile",
         "perl",
